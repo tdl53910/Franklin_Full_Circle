@@ -164,14 +164,17 @@ async function callAI(messages, maxTokens = 1200, endpoint = API_URL) {
             body: JSON.stringify({ messages, max_tokens: maxTokens, temperature: 0.7 })
         });
         if (!res.ok) {
-            const errText = await res.text();
+            let errText = '';
+            try { errText = await res.text(); } catch (_) {}
             console.error('API Error:', res.status, errText);
-            throw new Error(`API ${res.status}`);
+            showToast(`AI request failed (${res.status}). Check console for details.`, 'error');
+            throw new Error(`API ${res.status}: ${errText}`);
         }
         const data = await res.json();
         return data.choices?.[0]?.message?.content?.trim() || '';
     } catch (err) {
         console.error('OpenAI call failed:', err);
+        showToast('Could not reach AI service. Please try again.', 'error');
         return null;
     }
 }

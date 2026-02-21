@@ -1,6 +1,7 @@
 {
   "name": "franklin-full-circle",
   "version": "1.0.0",
+  "type": "module",
   "description": "UGA Franklin College Career Navigation Tool",
   "scripts": {
     "dev": "vercel dev"
