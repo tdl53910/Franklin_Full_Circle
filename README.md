@@ -53,8 +53,11 @@ Franklin Full Circle generates personalized career dossiers, faculty connections
 # Install dependencies
 npm install
 
-# Set your API key
-export OPENAI_API_KEY="sk-..."
+# Create local env file from template
+cp .env.example .env
+
+# Edit .env and set your key (never commit this file)
+# OPENAI_API_KEY=your_openai_api_key_here
 
 # Run locally with Vercel dev server
 vercel dev
@@ -74,6 +77,13 @@ The app will be available at `http://localhost:3000`.
 | Variable         | Required | Description                  |
 | ---------------- | -------- | ---------------------------- |
 | `OPENAI_API_KEY` | Yes      | Your OpenAI API key          |
+
+## Security Notes (GitHub-safe)
+
+- Keep secrets only in `.env` (already gitignored).
+- Commit `.env.example` only (safe template, no real key).
+- Configure `OPENAI_API_KEY` in Vercel Environment Variables for deploys.
+- If any real key was ever committed, rotate it in OpenAI dashboard immediately.
 
 ## How It Works
 
