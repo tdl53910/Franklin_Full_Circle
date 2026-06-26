@@ -1000,11 +1000,13 @@ function downloadPDF() {
 
     doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
     doc.setTextColor(186, 12, 47);
-    doc.text('Franklin Full Circle — Career Dossier', m, y); y += 20;
+    const titleLines = doc.splitTextToSize('Franklin Full Circle — Career Dossier', w);
+    doc.text(titleLines, m, y); y += titleLines.length * 20;
 
     doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
-    doc.text(`${studentData.name}  ·  ${studentData.year}  ·  ${studentData.major}`, m, y); y += 10;
+    const metaLines = doc.splitTextToSize(`${studentData.name}  ·  ${studentData.year}  ·  ${studentData.major}`, w);
+    doc.text(metaLines, m, y); y += metaLines.length * 13;
     doc.text(`Generated ${new Date().toLocaleDateString()}`, m, y); y += 24;
 
     const sections = [
