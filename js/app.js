@@ -481,12 +481,47 @@ function updateProgress() {
     $('progressText').textContent = `${currentQuestion + 1} / 7`;
 }
 
-function completeQuestionnaire() {
+async function completeQuestionnaire() {
     saveCurrentQuestion();
-    persist();
     $('questionnaireModal').classList.remove('active');
     showToast('Profile saved — generating your dossier…', 'success');
+
+    const normalized = await normalizeAcademicProgram(studentData.major);
+    if (normalized && normalized !== studentData.major) {
+        studentData.major = normalized;
+        hydrateQuestionInputs();
+    }
+
+    persist();
     updateDashboard();
+}
+
+async function normalizeAcademicProgram(raw) {
+    if (!raw || raw.trim().length < 2) return raw;
+    const messages = [
+        { role: 'system', content: `Convert a student's free-form academic program description into proper notation. Use standard degree abbreviations and full UGA program names.
+
+Examples:
+"bach in comp sci / minor in business" → "B.S. Computer Science; Minor in Business"
+"computer science major, math minor" → "B.S. Computer Science; Minor in Mathematics"
+"ba english minor poli sci" → "B.A. English; Minor in Political Science"
+"double major cs and econ" → "B.S. Computer Science; B.S. Economics"
+"journalism" → "B.S. Journalism"
+"pre-law political science" → "B.A. Political Science"
+"psychology bs, certificate in data science" → "B.S. Psychology; Certificate in Data Science"
+"masters data science" → "M.S. Data Science"
+
+Rules:
+- Use B.S. for sciences/engineering/business, B.A. for humanities/social sciences (when ambiguous, prefer B.S.)
+- Write out full program names (no abbreviations in the name itself)
+- Separate multiple programs with semicolons
+- Capitalize properly
+- If already properly formatted, return it unchanged
+Respond with ONLY the formatted string, nothing else.` },
+        { role: 'user', content: raw }
+    ];
+    const result = await callAI(messages, 80);
+    return (result && result.length > 0 && result.length < 200) ? result.trim() : raw;
 }
 
 function hydrateQuestionInputs() {
