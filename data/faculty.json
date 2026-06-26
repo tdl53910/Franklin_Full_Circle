@@ -27,7 +27,7 @@
     {"name": "Geng Yuan", "email": "geng.yuan@uga.edu", "department": "Computer Science", "college": "Franklin College of Arts & Sciences", "expertise": "Deep learning, neural network optimization"},
 
     {"name": "Charles S. Bullock III", "email": "", "department": "Political Science", "college": "School of Public and International Affairs", "expertise": "American politics, Southern politics, elections"},
-    {"name": "Jamie L. Carson", "email": "", "department": "Political Science", "college": "School of Public and International Affairs", "expertise": "Congress, legislative politics, elections"},
+    {"name": "Jamie L. Carson", "email": "carson@uga.edu", "department": "Political Science", "college": "School of Public and International Affairs", "expertise": "Congress, legislative politics, elections"},
     {"name": "Markus M. L. Crepaz", "email": "", "department": "Political Science", "college": "School of Public and International Affairs", "expertise": "Comparative politics, welfare state, European politics"},
     {"name": "Keith Dougherty", "email": "", "department": "Political Science", "college": "School of Public and International Affairs", "expertise": "Formal political theory, legislative bargaining"},
     {"name": "Audrey A. Haynes", "email": "", "department": "Political Science", "college": "School of Public and International Affairs", "expertise": "American politics, public opinion, presidential elections"},
