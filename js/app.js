@@ -329,7 +329,7 @@ Output ONLY raw JSON (no markdown fences):
     ... provide 5-6 items. Use ONLY reputable major outlets. All dates must be within the last 6 months. Do NOT include a url field.
   ],
   "opportunities": [
-    {"title": "<specific actionable step>", "type": "<category>", "timeline": "<when>"}
+    {"title": "<specific actionable step>", "type": "<category>"}
     ... provide 5-6 items
   ],
   "suggestedContacts": [
@@ -370,7 +370,7 @@ When you want to ADD or UPDATE items, include these tags in your response:
 - [ADD_CONTACTS: [{"name":"Dr. X","email":"x@uga.edu","department":"Dept","expertise":"focus"}]]
 - [ADD_CLUBS: [{"name":"Org","description":"why"}]]
 - [ADD_NEWS: [{"title":"headline","source":"pub","date":"date"}]]
-- [ADD_OPPS: [{"title":"action","type":"category","timeline":"when"}]]
+- [ADD_OPPS: [{"title":"action","type":"category"}]]
 - [UPDATE_DOSSIER: {"overview":"...","tier1":"...","tier2":"...","tier3":"...","summary":"...","careerMatches":["role1","role2",...]}] — rewrites dossier sections in place. Include ONLY the fields you are changing. Write the same depth as the original (4-7 sentences per section).
 
 DOSSIER UPDATE RULES — follow these precisely:
@@ -438,7 +438,6 @@ function setupEventListeners() {
     $('chatInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
     });
-    $('refreshContactsBtn')?.addEventListener('click', () => { showToast('Finding more faculty…', 'info'); fetchMoreContacts(); });
     $('prevBtn').addEventListener('click', prevQuestion);
     $('nextBtn').addEventListener('click', nextQuestion);
 
@@ -786,6 +785,7 @@ function renderContacts() {
             <a href="${esc(buildFacultyUrl(c.name, c.department))}" target="_blank" rel="noopener noreferrer" class="club-link">Find on directory →</a>
         </li>
     `).join('');
+    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreContacts()">+ Add more faculty</button>`;
     $('ugaConnections').textContent = contacts.length;
 }
 
@@ -832,6 +832,30 @@ function renderClubs() {
             <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="club-link">Search on UGA Engage →</a>
         </li>`;
     }).join('');
+    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreClubs()">+ Add more organizations</button>`;
+}
+
+async function fetchMoreClubs() {
+    showToast('Finding more organizations…', 'info');
+    const existingNames = clubs.map(c => c.name).join(', ');
+    const filteredOrgs = relevantOrgs(30);
+    const orgSource = filteredOrgs.length
+        ? `SELECT ONLY from this verified UGA org list — do not invent names not on it:\n${JSON.stringify(filteredOrgs.map(o => ({ name: o.name, description: o.description })))}`
+        : '';
+    const messages = [
+        { role: 'system', content: `Suggest 3 MORE UGA student organizations relevant to this student. Do NOT repeat any already listed. Output raw JSON array only (no markdown):\n[{"name":"Org Name","description":"why this org helps their goals"}]\n\n${orgSource}` },
+        { role: 'user', content: `${profileBlurb()}\n\nAlready suggested (do not repeat): ${existingNames || 'none yet'}` }
+    ];
+    const raw = await callAI(messages, 400);
+    const newClubs = tryParseJSON(raw);
+    if (Array.isArray(newClubs) && newClubs.length) {
+        clubs = [...newClubs, ...clubs];
+        persist();
+        renderClubs();
+        showToast(`Added ${newClubs.length} organizations`, 'success');
+    } else {
+        showToast('Could not find additional organizations', 'error');
+    }
 }
 
 function removeClub(idx) {
@@ -873,7 +897,7 @@ function renderOpportunities() {
             </label>
             <div class="opp-body">
                 <div class="opp-title">${esc(o.title)}</div>
-                <div class="opp-meta"><span>${esc(o.type)}</span><span class="news-date">· ${esc(o.timeline)}</span></div>
+                <div class="opp-meta"><span>${esc(o.type)}</span></div>
             </div>
             <button class="item-x" onclick="removeOpp(${i})" aria-label="Remove">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
@@ -900,7 +924,7 @@ async function fetchMoreOpportunities() {
     showToast('Finding more action steps…', 'info');
     const existing = opportunities.map(o => o.title).join('; ');
     const messages = [
-        { role: 'system', content: `Generate 3 NEW actionable career steps for this student. Do NOT repeat anything already listed. Be specific — name real UGA programs, deadlines, or contacts where possible. Output raw JSON array only:\n[{"title":"...","type":"...","timeline":"..."}]` },
+        { role: 'system', content: `Generate 3 NEW actionable career steps for this student. Do NOT repeat anything already listed. Be specific — name real UGA programs or offices where possible. Output raw JSON array only:\n[{"title":"...","type":"..."}]` },
         { role: 'user', content: `${profileBlurb()}\n\nAlready listed (do not repeat): ${existing}` }
     ];
     const raw = await callAI(messages, 400);
@@ -1234,4 +1258,5 @@ window.removeNews = removeNews;
 window.removeOpp = removeOpp;
 window.toggleOpp = toggleOpp;
 window.fetchMoreContacts = fetchMoreContacts;
+window.fetchMoreClubs = fetchMoreClubs;
 window.fetchMoreOpportunities = fetchMoreOpportunities;
