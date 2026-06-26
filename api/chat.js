@@ -1,4 +1,4 @@
-// Vercel Serverless Function — chat endpoint using OpenAI SDK
+// Vercel Serverless Function — OpenAI proxy
 // Set OPENAI_API_KEY in Vercel project settings → Environment Variables
 
 import OpenAI from 'openai';
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         const openai = new OpenAI({ apiKey });
 
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: 'gpt-4o',
             messages,
             max_tokens,
             temperature,
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
         return res.status(200).json(completion);
     } catch (err) {
-        console.error('Chat error:', err);
+        console.error('OpenAI error:', err);
         return res.status(500).json({ error: err.message });
     }
 }

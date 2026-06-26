@@ -4,7 +4,6 @@
 // ============================================================
 
 const API_URL = '/api/chat';
-const DOSSIER_API_URL = '/api/generate-dossier';
 const ENGAGE_BASE = 'https://uga.campuslabs.com/engage/organizations';
 const ENGAGE_SEARCH = 'https://uga.campuslabs.com/engage/search?query=';
 
@@ -103,6 +102,7 @@ let newsItems = [];
 let opportunities = [];
 let draggedItem = null;
 let chatBusy = false;
+let facultyData = [];
 
 // ── helpers ──────────────────────────────────────────────────
 const $ = (sel) => document.getElementById(sel);
@@ -153,6 +153,42 @@ function buildFacultyUrl(name, department) {
     // Fallback: Google the professor's name + UGA
     const query = `${(name || '').trim()} UGA faculty`;
     return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+// ── faculty data ─────────────────────────────────────────────
+async function loadFacultyData() {
+    try {
+        const res = await fetch('/data/faculty.json');
+        if (res.ok) {
+            const json = await res.json();
+            facultyData = json.faculty || [];
+        }
+    } catch (e) {
+        console.warn('Could not load faculty data:', e);
+    }
+}
+
+function relevantFaculty(maxResults = 20) {
+    if (!facultyData.length) return [];
+    const keywords = [
+        ...studentData.interests,
+        ...studentData.desiredSkills,
+        ...(studentData.major || '').split(/[,\/]+/)
+    ].map(k => k.toLowerCase().trim()).filter(k => k.length > 2);
+
+    const scored = facultyData.map(f => {
+        let score = 0;
+        const haystack = `${f.department} ${f.expertise} ${f.college}`.toLowerCase();
+        keywords.forEach(kw => {
+            if (haystack.includes(kw)) score += 3;
+            kw.split(/\s+/).forEach(word => {
+                if (word.length > 3 && haystack.includes(word)) score += 1;
+            });
+        });
+        return { ...f, _score: score };
+    });
+    scored.sort((a, b) => b._score - a._score || Math.random() - 0.5);
+    return scored.slice(0, maxResults).map(({ _score, ...f }) => f);
 }
 
 // ── OpenAI proxy ─────────────────────────────────────────────
@@ -259,7 +295,7 @@ Output ONLY raw JSON (no markdown fences):
   ],
   "suggestedContacts": [
     {"name": "Dr. Full Name", "email": "email@uga.edu", "department": "Department Name", "expertise": "Specific research focus"}
-    ... provide 3-4 REAL UGA faculty whose research intersects student interests. Do NOT include a profileUrl field.
+    ... provide 3-4 faculty chosen from the VERIFIED FACULTY LIST appended to the end of this prompt. Pick those whose research best matches this student. Do NOT invent names not in that list. Do NOT include a profileUrl field.
   ],
   "suggestedClubs": [
     {"name": "Real UGA Organization Name", "description": "Why this org helps their specific career goals"}
@@ -290,24 +326,27 @@ Your capabilities:
 3. Refine career recommendations based on feedback
 4. Remove/exclude careers when asked
 
-When you want to ADD items, include these tags in your response:
+When you want to ADD or UPDATE items, include these tags in your response:
 - [EXCLUDE: career name] — removes a career from recommendations
 - [ADD_CONTACTS: [{"name":"Dr. X","email":"x@uga.edu","department":"Dept","expertise":"focus"}]]
 - [ADD_CLUBS: [{"name":"Org","description":"why"}]]
 - [ADD_NEWS: [{"title":"headline","source":"pub","date":"date"}]]
 - [ADD_OPPS: [{"title":"action","type":"category","timeline":"when"}]]
+- [UPDATE_DOSSIER: {"overview":"...","tier1":"...","tier2":"...","tier3":"...","summary":"...","careerMatches":["role1","role2",...]}] — rewrites dossier sections in place. Include ONLY the fields you are changing. Use this when the student asks to shift their focus, refine their direction, or explicitly asks to update their dossier. Write the same depth as the original (4-7 sentences per section).
 
 RULES:
 - Be conversational and natural, not robotic
 - Give specific advice referencing real UGA resources
 - Keep responses focused (3-6 sentences unless more detail requested)
 - Actually help — don't just describe what you could do
-- Reference the conversation history to maintain continuity`;
+- Reference the conversation history to maintain continuity
+- When the student's interests shift significantly, proactively offer to update the dossier and use [UPDATE_DOSSIER] to do it`;
 
 // ── init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', initializeApp);
 
-function initializeApp() {
+async function initializeApp() {
+    await loadFacultyData();
     loadSavedData();
     setupEventListeners();
     setupDragAndDrop();
@@ -541,12 +580,16 @@ async function updateDashboard() {
     $('dossierLoading').style.display = 'block';
     $('dossierMeta').textContent = 'Generating your personalized dossier…';
 
+    const filtered = relevantFaculty(20);
+    const facultyBlock = filtered.length
+        ? `\n\nVERIFIED UGA FACULTY — you MUST pick suggestedContacts only from this list. Do not invent names:\n${JSON.stringify(filtered)}`
+        : '';
     const messages = [
-        { role: 'system', content: SYSTEM_DOSSIER },
+        { role: 'system', content: SYSTEM_DOSSIER + facultyBlock },
         { role: 'user', content: profileBlurb() }
     ];
 
-    const raw = await callAI(messages, 2500, DOSSIER_API_URL);
+    const raw = await callAI(messages, 2500);
     $('dossierLoading').style.display = 'none';
 
     const parsed = tryParseJSON(raw);
@@ -642,8 +685,12 @@ function removeContact(idx) {
 
 async function fetchMoreContacts() {
     const existingNames = contacts.map(c => c.name).join(', ');
+    const filtered = relevantFaculty(25);
+    const facultySource = filtered.length
+        ? `SELECT ONLY from this verified UGA faculty list — do not invent names not on it:\n${JSON.stringify(filtered)}`
+        : `${UGA_CONTEXT}\n\nUse REAL professors from UGA department directories.`;
     const messages = [
-        { role: 'system', content: `${UGA_CONTEXT}\n\nSuggest 3 MORE UGA faculty members relevant to this student. Use REAL professors from UGA department directories. Do NOT suggest anyone already listed.\n\nOutput raw JSON array only (no markdown):\n[{"name":"Dr. Full Name","email":"first.last@uga.edu","department":"Department","expertise":"research focus"}]` },
+        { role: 'system', content: `Suggest 3 MORE UGA faculty relevant to this student. Do NOT repeat anyone already listed. Output raw JSON array only (no markdown):\n[{"name":"Full Name","email":"email@uga.edu","department":"Department","expertise":"research focus"}]\n\n${facultySource}` },
         { role: 'user', content: `${profileBlurb()}\n\nAlready suggested (do not repeat): ${existingNames || 'none yet'}` }
     ];
     const raw = await callAI(messages, 600);
@@ -745,7 +792,11 @@ async function sendChatMessage() {
     const contactNames = contacts.map(c => c.name).join(', ') || 'none yet';
     const clubNames = clubs.map(c => c.name).join(', ') || 'none yet';
     
-    let sysPrompt = SYSTEM_CHAT
+    const filtered = relevantFaculty(15);
+    const facultyBlock = filtered.length
+        ? `\n\nVERIFIED UGA FACULTY — when suggesting contacts via [ADD_CONTACTS], use ONLY names from this list:\n${JSON.stringify(filtered)}`
+        : '';
+    let sysPrompt = (SYSTEM_CHAT + facultyBlock)
         .replace('{PROFILE}', profileBlurb())
         .replace('{CAREERS}', careers)
         .replace('{CONTACTS}', contactNames)
@@ -838,6 +889,25 @@ async function sendChatMessage() {
         }
     }
 
+    const dossierUpdateMatch = text.match(/\[UPDATE_DOSSIER:\s*(\{[\s\S]*?\})\s*\]/i);
+    if (dossierUpdateMatch && generatedDossier) {
+        const updates = tryParseJSON(dossierUpdateMatch[1]);
+        if (updates && typeof updates === 'object') {
+            if (updates.overview) generatedDossier.overview = updates.overview;
+            if (updates.tier1) generatedDossier.tier1 = updates.tier1;
+            if (updates.tier2) generatedDossier.tier2 = updates.tier2;
+            if (updates.tier3) generatedDossier.tier3 = updates.tier3;
+            if (updates.summary) generatedDossier.summary = updates.summary;
+            if (Array.isArray(updates.careerMatches) && updates.careerMatches.length) {
+                generatedDossier.careerMatches = updates.careerMatches;
+                excludedPaths = excludedPaths.filter(p => !updates.careerMatches.includes(p));
+            }
+            renderDossier();
+            renderCareerBubbles();
+            showToast('Dossier updated!', 'success');
+        }
+    }
+
     // Clean directives from display text
     text = text
         .replace(/\[EXCLUDE:[^\]]*\]/gi, '')
@@ -845,6 +915,7 @@ async function sendChatMessage() {
         .replace(/\[ADD_CLUBS:\s*\[[\s\S]*?\]\s*\]/gi, '')
         .replace(/\[ADD_NEWS:\s*\[[\s\S]*?\]\s*\]/gi, '')
         .replace(/\[ADD_OPPS:\s*\[[\s\S]*?\]\s*\]/gi, '')
+        .replace(/\[UPDATE_DOSSIER:\s*\{[\s\S]*?\}\s*\]/gi, '')
         .trim();
 
     if (text) {
