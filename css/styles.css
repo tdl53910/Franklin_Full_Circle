@@ -298,6 +298,20 @@ body {
 /* ===== CONTACTS, CLUBS ===== */
 .contacts-container,
 .clubs-container { padding: 0.4rem; flex: 1; overflow-y: auto; }
+.faculty-search-wrap { padding: 0.2rem 0.1rem 0.4rem; }
+.faculty-search-input {
+    width: 100%;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.76rem;
+    border: 1px solid var(--g-200);
+    border-radius: var(--radius-sm);
+    background: var(--g-50);
+    color: var(--g-800);
+    outline: none;
+    box-sizing: border-box;
+    transition: var(--ease);
+}
+.faculty-search-input:focus { border-color: var(--uga-red); background: #fff; }
 .contact-list, .club-list { list-style: none; }
 .contact-item, .club-item {
     padding: 0.55rem 0.45rem;

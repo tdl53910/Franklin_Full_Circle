@@ -774,18 +774,37 @@ function removeCareer(career) {
 // ── contacts rendering ───────────────────────────────────────
 function renderContacts() {
     const el = $('contactList');
-    el.innerHTML = contacts.map((c, i) => `
+    const query = ($('facultySearch')?.value || '').toLowerCase().trim();
+
+    // If there's a search query, search the full faculty database; otherwise show AI-suggested contacts
+    let displayList;
+    if (query.length >= 2) {
+        displayList = facultyData.filter(f => {
+            const haystack = `${f.name} ${f.department} ${f.expertise} ${f.college}`.toLowerCase();
+            return query.split(/\s+/).every(word => haystack.includes(word));
+        }).slice(0, 20);
+    } else {
+        displayList = contacts;
+    }
+
+    el.innerHTML = displayList.map((c, i) => `
         <li class="contact-item">
-            <button class="item-x" onclick="removeContact(${i})" aria-label="Remove">
+            ${!query ? `<button class="item-x" onclick="removeContact(${i})" aria-label="Remove">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
-            </button>
+            </button>` : ''}
             <div class="contact-name">${esc(c.name)}</div>
             ${normalizeEmail(c.email) ? `<a href="mailto:${esc(normalizeEmail(c.email))}" class="contact-email">${esc(normalizeEmail(c.email))}</a>` : `<div class="contact-email">${esc(c.email || 'Email unavailable')}</div>`}
             <div class="contact-dept">${esc(c.department)}${c.expertise ? ' · ' + esc(c.expertise) : ''}</div>
             <a href="${esc(buildFacultyUrl(c.name, c.department))}" target="_blank" rel="noopener noreferrer" class="club-link">Find on directory →</a>
         </li>
     `).join('');
-    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreContacts()">+ Add more faculty</button>`;
+
+    if (!query) {
+        el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreContacts()">+ Add more faculty</button>`;
+    } else if (displayList.length === 0) {
+        el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No faculty found for "${esc(query)}"</li>`;
+    }
+
     $('ugaConnections').textContent = contacts.length;
 }
 

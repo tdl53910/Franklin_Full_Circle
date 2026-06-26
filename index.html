@@ -122,6 +122,9 @@
                 </div>
                 <div class="contacts-container">
                     <div class="loading-spinner" id="contactsLoading" style="display: none;"></div>
+                    <div class="faculty-search-wrap">
+                        <input type="text" id="facultySearch" class="faculty-search-input" placeholder="Search by name or field…" oninput="renderContacts()" autocomplete="off">
+                    </div>
                     <ul class="contact-list" id="contactList"></ul>
                 </div>
             </div>
