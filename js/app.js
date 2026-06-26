@@ -303,24 +303,26 @@ When mentioning student organizations, use REAL UGA organizations from the Invol
 When recommending resources, use the actual UGA resource names and URLs above.
 `;
 
-const SYSTEM_DOSSIER = `You are an expert career advisor at UGA's Franklin College of Arts & Sciences.
+const SYSTEM_DOSSIER = `You are a career analyst producing an objective, factual career assessment for a UGA student.
 
 ${UGA_CONTEXT}
 
-WRITING RULES:
-- NEVER parrot student input verbatim. Don't write "B.S. Computer Science" — write "Computer Science" or "computing."
-- NEVER list their skills back. Synthesize their professional identity.
-- Write insightfully. Second person, warm, substantive.
-- Each section should be 4-6 sentences minimum. Provide depth and specifics.
-- Reference specific UGA resources, programs, and opportunities by name.
+TONE AND WRITING RULES:
+- Write analytically and objectively — this is an assessment, not a sales pitch or motivational letter.
+- Do NOT use flattering or hype language ("uniquely positioned," "superpower," "rare and valuable," etc.).
+- State the student's demonstrated interests, skills, and academic focus plainly and accurately.
+- For each career path, describe what the role involves, why it aligns with the student's stated background, and one concrete next step.
+- Each section must be 4-6 sentences. Be specific and grounded — no filler.
+- Reference real UGA resources, programs, and deadlines by name.
+- Write in third person (e.g., "This student's background in..." or "Students with this profile...").
 
 Output ONLY raw JSON (no markdown fences):
 {
-  "overview": "<4-6 sentences interpreting WHO this student is professionally. What's their superpower? How do their disciplines intersect uniquely? What kind of thinker are they?>",
-  "tier1": "<Full paragraph (5-7 sentences) naming 3-4 PRIMARY career paths. For each: name the role, explain WHY it fits THIS student specifically, and mention 1 concrete step or resource.>",
-  "tier2": "<Full paragraph (5-7 sentences) naming 3-4 EMERGING or less obvious career paths. These should be creative, growing fields, or unexpected intersections.>",
-  "tier3": "<Full paragraph (4-5 sentences) naming 2-3 AMBITIOUS long-shot paths — moonshots, entrepreneurial ideas, or unconventional routes worth keeping on the radar.>",
-  "summary": "<Full paragraph (5-7 sentences) with CONCRETE actions: What should they do THIS WEEK? This month? This semester? Name specific UGA resources like CURO, Career Center, specific departments, Handshake, etc.>",
+  "overview": "<4-6 sentences objectively describing the student's academic background, demonstrated interests, and skill set. State what their coursework and experiences suggest about their career inclinations — no embellishment.>",
+  "tier1": "<Full paragraph (5-7 sentences) identifying 3-4 PRIMARY career paths that align directly with the student's stated major, skills, and interests. For each: describe the role, explain the specific alignment with this student's profile, and name one concrete step or UGA resource.>",
+  "tier2": "<Full paragraph (5-7 sentences) identifying 3-4 ADJACENT or EMERGING paths the student's background qualifies them for, including fields they may not have considered. Explain the connection to their existing skills and what additional preparation would help.>",
+  "tier3": "<Full paragraph (4-5 sentences) identifying 2-3 LONGER-TERM or UNCONVENTIONAL paths — graduate study options, entrepreneurial directions, or niche fields — that are feasible but require additional development or commitment.>",
+  "summary": "<Full paragraph (5-7 sentences) listing CONCRETE near-term actions: specific steps for this week, this month, and this semester. Name real UGA offices (Career Center, CURO, Handshake, specific departments) and realistic timelines.>",
   "careerMatches": ["<role1>", "<role2>", ... 10-15 distinct role titles from all tiers],
   "news": [
     {"title": "<real recent article headline related to student's interests>", "source": "<reputable outlet: NYT, WSJ, Forbes, HBR, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, etc>", "date": "<within the last 6 months, e.g. 'June 2026' or 'March 2026'>"}
@@ -865,21 +867,52 @@ function removeNews(idx) {
 function renderOpportunities() {
     const el = $('opportunityList');
     el.innerHTML = opportunities.map((o, i) => `
-        <div class="news-item">
+        <div class="opp-item${o.done ? ' opp-done' : ''}">
+            <label class="opp-check-label">
+                <input type="checkbox" class="opp-checkbox" ${o.done ? 'checked' : ''} onchange="toggleOpp(${i}, this.checked)" aria-label="Mark complete">
+            </label>
+            <div class="opp-body">
+                <div class="opp-title">${esc(o.title)}</div>
+                <div class="opp-meta"><span>${esc(o.type)}</span><span class="news-date">· ${esc(o.timeline)}</span></div>
+            </div>
             <button class="item-x" onclick="removeOpp(${i})" aria-label="Remove">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
             </button>
-            <div class="news-title">${esc(o.title)}</div>
-            <div class="news-source"><span>${esc(o.type)}</span><span class="news-date">· ${esc(o.timeline)}</span></div>
         </div>
     `).join('');
-    $('opportunities').textContent = opportunities.length;
+    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreOpportunities()">+ Add more steps</button>`;
+    $('opportunities').textContent = opportunities.filter(o => !o.done).length;
+}
+
+function toggleOpp(idx, done) {
+    opportunities[idx] = { ...opportunities[idx], done };
+    persist();
+    renderOpportunities();
 }
 
 function removeOpp(idx) {
     opportunities.splice(idx, 1);
     persist();
     renderOpportunities();
+}
+
+async function fetchMoreOpportunities() {
+    showToast('Finding more action steps…', 'info');
+    const existing = opportunities.map(o => o.title).join('; ');
+    const messages = [
+        { role: 'system', content: `Generate 3 NEW actionable career steps for this student. Do NOT repeat anything already listed. Be specific — name real UGA programs, deadlines, or contacts where possible. Output raw JSON array only:\n[{"title":"...","type":"...","timeline":"..."}]` },
+        { role: 'user', content: `${profileBlurb()}\n\nAlready listed (do not repeat): ${existing}` }
+    ];
+    const raw = await callAI(messages, 400);
+    const newOpps = tryParseJSON(raw);
+    if (Array.isArray(newOpps) && newOpps.length) {
+        opportunities = [...newOpps, ...opportunities];
+        persist();
+        renderOpportunities();
+        showToast(`Added ${newOpps.length} steps`, 'success');
+    } else {
+        showToast('Could not generate more steps', 'error');
+    }
 }
 
 // ── chat ─────────────────────────────────────────────────────
@@ -1199,4 +1232,6 @@ window.removeContact = removeContact;
 window.removeClub = removeClub;
 window.removeNews = removeNews;
 window.removeOpp = removeOpp;
+window.toggleOpp = toggleOpp;
 window.fetchMoreContacts = fetchMoreContacts;
+window.fetchMoreOpportunities = fetchMoreOpportunities;

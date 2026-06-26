@@ -369,6 +369,48 @@ body {
 .news-source { font-size: 0.66rem; color: var(--g-500); display: flex; align-items: center; gap: 0.25rem; }
 .news-date { color: var(--uga-red); font-weight: 500; }
 
+/* ===== OPPORTUNITY CHECKLIST ===== */
+.opp-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.5rem 0.45rem;
+    border-bottom: 1px solid var(--g-100);
+    border-radius: var(--radius-sm);
+    transition: var(--ease);
+    position: relative;
+}
+.opp-item:last-of-type { border-bottom: none; }
+.opp-item:hover { background: var(--g-50); }
+.opp-item:hover .item-x { opacity: 1; }
+.opp-check-label { display: flex; align-items: center; padding-top: 0.1rem; cursor: pointer; flex-shrink: 0; }
+.opp-checkbox {
+    width: 14px; height: 14px;
+    accent-color: var(--uga-red);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.opp-body { flex: 1; min-width: 0; }
+.opp-title { font-weight: 500; font-size: 0.78rem; color: var(--g-800); margin-bottom: 0.1rem; line-height: 1.4; }
+.opp-meta { font-size: 0.66rem; color: var(--g-500); display: flex; align-items: center; gap: 0.25rem; }
+.opp-done .opp-title { text-decoration: line-through; color: var(--g-400); }
+.opp-done .opp-meta { color: var(--g-300); }
+.add-more-btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.4rem;
+    background: none;
+    border: 1px dashed var(--g-200);
+    border-radius: var(--radius-sm);
+    color: var(--g-500);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--ease);
+    text-align: center;
+}
+.add-more-btn:hover { border-color: var(--uga-red); color: var(--uga-red); background: var(--uga-red-soft); }
+
 /* ===== CHAT ===== */
 .chat-container { flex: 1; display: flex; flex-direction: column; height: 360px; }
 .chat-messages {
