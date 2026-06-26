@@ -286,8 +286,8 @@ Output ONLY raw JSON (no markdown fences):
   "summary": "<Full paragraph (5-7 sentences) with CONCRETE actions: What should they do THIS WEEK? This month? This semester? Name specific UGA resources like CURO, Career Center, specific departments, Handshake, etc.>",
   "careerMatches": ["<role1>", "<role2>", ... 10-15 distinct role titles from all tiers],
   "news": [
-    {"title": "<real recent article headline related to student's interests>", "source": "<publication name like NYT, Forbes, etc>", "date": "<approx date>"}
-    ... provide 5-6 items. Use real-sounding headlines from reputable sources. Do NOT include a url field.
+    {"title": "<real recent article headline related to student's interests>", "source": "<reputable outlet: NYT, WSJ, Forbes, HBR, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, etc>", "date": "<within the last 6 months, e.g. 'June 2026' or 'March 2026'>"}
+    ... provide 5-6 items. Use ONLY reputable major outlets. All dates must be within the last 6 months. Do NOT include a url field.
   ],
   "opportunities": [
     {"title": "<specific actionable step>", "type": "<category>", "timeline": "<when>"}
@@ -367,7 +367,11 @@ async function initializeApp() {
     } else {
         hydrateQuestionInputs();
         renderAll();
-        if (!generatedDossier) updateDashboard();
+        if (!generatedDossier) {
+            updateDashboard();
+        } else {
+            refreshNews();
+        }
     }
 
     if (!chatHistory.length) {
@@ -658,6 +662,26 @@ async function updateDashboard() {
     showToast('Dossier generated!', 'success');
 }
 
+async function refreshNews() {
+    const today = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const messages = [
+        { role: 'system', content: `Generate 5-6 recent industry news articles relevant to this student's career interests.
+RULES:
+- Use ONLY reputable major outlets: NYT, Wall Street Journal, Forbes, Harvard Business Review, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, Washington Post, Vox, TIME, etc.
+- Every article date must be within the last 6 months (today is ${today})
+- Headlines should sound like real, specific recent news — not generic
+- Do NOT include URLs
+Output raw JSON array only (no markdown): [{"title":"...","source":"...","date":"..."}]` },
+        { role: 'user', content: profileBlurb() }
+    ];
+    const raw = await callAI(messages, 600);
+    const fresh = tryParseJSON(raw);
+    if (Array.isArray(fresh) && fresh.length) {
+        newsItems = fresh;
+        renderNews();
+    }
+}
+
 // ── dossier rendering ────────────────────────────────────────
 function renderDossier() {
     if (!generatedDossier) return;
@@ -741,7 +765,7 @@ async function fetchMoreContacts() {
     const raw = await callAI(messages, 600);
     const newContacts = tryParseJSON(raw);
     if (Array.isArray(newContacts) && newContacts.length) {
-        contacts = [...contacts, ...newContacts];
+        contacts = [...newContacts, ...contacts];
         persist();
         renderContacts();
         showToast(`Added ${newContacts.length} faculty contacts`, 'success');
@@ -900,7 +924,7 @@ async function sendChatMessage() {
     if (contactsMatch) {
         const newContacts = tryParseJSON(contactsMatch[1]);
         if (Array.isArray(newContacts) && newContacts.length) {
-            contacts = [...contacts, ...newContacts];
+            contacts = [...newContacts, ...contacts];
             renderContacts();
             showToast(`Added ${newContacts.length} contacts`, 'success');
         }
@@ -910,7 +934,7 @@ async function sendChatMessage() {
     if (clubsMatch) {
         const newClubs = tryParseJSON(clubsMatch[1]);
         if (Array.isArray(newClubs) && newClubs.length) {
-            clubs = [...clubs, ...newClubs];
+            clubs = [...newClubs, ...clubs];
             renderClubs();
             showToast(`Added ${newClubs.length} organizations`, 'success');
         }
