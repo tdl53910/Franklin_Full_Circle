@@ -795,7 +795,6 @@ function renderContacts() {
             <div class="contact-name">${esc(c.name)}</div>
             ${normalizeEmail(c.email) ? `<a href="mailto:${esc(normalizeEmail(c.email))}" class="contact-email">${esc(normalizeEmail(c.email))}</a>` : `<div class="contact-email">${esc(c.email || 'Email unavailable')}</div>`}
             <div class="contact-dept">${esc(c.department)}${c.expertise ? ' · ' + esc(c.expertise) : ''}</div>
-            <a href="${esc(buildFacultyUrl(c.name, c.department))}" target="_blank" rel="noopener noreferrer" class="club-link">Find on directory →</a>
         </li>
     `).join('');
 
