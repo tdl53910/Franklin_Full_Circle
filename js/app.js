@@ -103,6 +103,7 @@ let opportunities = [];
 let draggedItem = null;
 let chatBusy = false;
 let facultyData = [];
+let orgData = [];
 
 // ── helpers ──────────────────────────────────────────────────
 const $ = (sel) => document.getElementById(sel);
@@ -189,6 +190,42 @@ function relevantFaculty(maxResults = 20) {
     });
     scored.sort((a, b) => b._score - a._score || Math.random() - 0.5);
     return scored.slice(0, maxResults).map(({ _score, ...f }) => f);
+}
+
+// ── org data ─────────────────────────────────────────────────
+async function loadOrgData() {
+    try {
+        const res = await fetch('/data/orgs.json');
+        if (res.ok) {
+            const json = await res.json();
+            orgData = json.orgs || [];
+        }
+    } catch (e) {
+        console.warn('Could not load org data:', e);
+    }
+}
+
+function relevantOrgs(maxResults = 20) {
+    if (!orgData.length) return [];
+    const keywords = [
+        ...studentData.interests,
+        ...studentData.desiredSkills,
+        ...(studentData.major || '').split(/[,\/;]+/)
+    ].map(k => k.toLowerCase().trim()).filter(k => k.length > 2);
+
+    const scored = orgData.map(o => {
+        let score = 0;
+        const haystack = `${o.name} ${o.category} ${o.description} ${(o.keywords || []).join(' ')}`.toLowerCase();
+        keywords.forEach(kw => {
+            if (haystack.includes(kw)) score += 3;
+            kw.split(/\s+/).forEach(word => {
+                if (word.length > 3 && haystack.includes(word)) score += 1;
+            });
+        });
+        return { ...o, _score: score };
+    });
+    scored.sort((a, b) => b._score - a._score || Math.random() - 0.5);
+    return scored.slice(0, maxResults).map(({ _score, ...o }) => o);
 }
 
 // ── OpenAI proxy ─────────────────────────────────────────────
@@ -298,8 +335,8 @@ Output ONLY raw JSON (no markdown fences):
     ... provide 3-4 faculty chosen from the VERIFIED FACULTY LIST appended to the end of this prompt. Pick those whose research best matches this student. Do NOT invent names not in that list. Do NOT include a profileUrl field.
   ],
   "suggestedClubs": [
-    {"name": "Real UGA Organization Name", "description": "Why this org helps their specific career goals"}
-    ... provide 3-4 REAL UGA student organizations. Do NOT include a slug field.
+    {"name": "Exact org name from the VERIFIED UGA STUDENT ORGANIZATIONS list", "description": "Why this org helps their specific career goals"}
+    ... provide 3-4 orgs chosen ONLY from the VERIFIED UGA STUDENT ORGANIZATIONS list appended to this prompt. Do NOT invent org names. Do NOT include a slug field.
   ]
 }`;
 
@@ -356,7 +393,7 @@ GENERAL RULES:
 document.addEventListener('DOMContentLoaded', initializeApp);
 
 async function initializeApp() {
-    await loadFacultyData();
+    await Promise.all([loadFacultyData(), loadOrgData()]);
     loadSavedData();
     setupEventListeners();
     setupDragAndDrop();
@@ -633,8 +670,12 @@ async function updateDashboard() {
     const facultyBlock = filtered.length
         ? `\n\nVERIFIED UGA FACULTY — you MUST pick suggestedContacts only from this list. Do not invent names:\n${JSON.stringify(filtered)}`
         : '';
+    const filteredOrgs = relevantOrgs(25);
+    const orgBlock = filteredOrgs.length
+        ? `\n\nVERIFIED UGA STUDENT ORGANIZATIONS — you MUST pick suggestedClubs only from this list. Do not invent org names:\n${JSON.stringify(filteredOrgs.map(o => ({ name: o.name, description: o.description })))}`
+        : '';
     const messages = [
-        { role: 'system', content: SYSTEM_DOSSIER + facultyBlock },
+        { role: 'system', content: SYSTEM_DOSSIER + facultyBlock + orgBlock },
         { role: 'user', content: profileBlurb() }
     ];
 
@@ -865,7 +906,11 @@ async function sendChatMessage() {
     const facultyBlock = filtered.length
         ? `\n\nVERIFIED UGA FACULTY — when suggesting contacts via [ADD_CONTACTS], use ONLY names from this list:\n${JSON.stringify(filtered)}`
         : '';
-    let sysPrompt = (SYSTEM_CHAT + facultyBlock)
+    const filteredOrgs = relevantOrgs(20);
+    const orgBlock = filteredOrgs.length
+        ? `\n\nVERIFIED UGA STUDENT ORGANIZATIONS — when suggesting clubs via [ADD_CLUBS], use ONLY org names from this list:\n${JSON.stringify(filteredOrgs.map(o => ({ name: o.name, description: o.description })))}`
+        : '';
+    let sysPrompt = (SYSTEM_CHAT + facultyBlock + orgBlock)
         .replace('{PROFILE}', profileBlurb())
         .replace('{CAREERS}', careers)
         .replace('{CONTACTS}', contactNames)

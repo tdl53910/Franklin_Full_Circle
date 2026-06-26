@@ -1,0 +1,604 @@
+{
+  "orgs": [
+    {
+      "name": "The Red & Black",
+      "category": "Media & Journalism",
+      "description": "UGA's independent student newspaper covering campus news, sports, and culture — print, digital, and multimedia",
+      "keywords": ["journalism", "writing", "media", "news", "communication", "publishing", "reporting", "editing"]
+    },
+    {
+      "name": "WUOG 90.5 FM",
+      "category": "Media & Broadcasting",
+      "description": "Student-run FM radio station producing music, news, and talk programming",
+      "keywords": ["radio", "broadcasting", "media", "music", "communication", "production", "audio"]
+    },
+    {
+      "name": "Association for Computing Machinery (ACM) at UGA",
+      "category": "Technology & Computing",
+      "description": "Technical workshops, competitive programming, hackathons, and industry networking for CS and tech students",
+      "keywords": ["computer science", "programming", "software", "technology", "data", "computing", "engineering", "coding", "hackathon"]
+    },
+    {
+      "name": "UGA Data Science Club",
+      "category": "Technology & Computing",
+      "description": "Machine learning, data analysis, and applied statistics projects and workshops",
+      "keywords": ["data science", "machine learning", "statistics", "analytics", "python", "artificial intelligence", "AI", "computing"]
+    },
+    {
+      "name": "UGA Cybersecurity Club",
+      "category": "Technology & Computing",
+      "description": "Capture-the-flag competitions, ethical hacking workshops, and cybersecurity career development",
+      "keywords": ["cybersecurity", "security", "computer science", "hacking", "networking", "technology"]
+    },
+    {
+      "name": "UGA Artificial Intelligence Club",
+      "category": "Technology & Computing",
+      "description": "Applied AI and machine learning projects, research discussions, and industry speaker events",
+      "keywords": ["artificial intelligence", "AI", "machine learning", "deep learning", "data science", "computer science", "technology"]
+    },
+    {
+      "name": "Society of Women Engineers (SWE) at UGA",
+      "category": "Engineering & STEM",
+      "description": "Professional development, mentorship, and community for women in engineering and computing",
+      "keywords": ["engineering", "women in STEM", "technology", "computer science", "professional development", "networking"]
+    },
+    {
+      "name": "Institute of Electrical and Electronics Engineers (IEEE) at UGA",
+      "category": "Engineering & STEM",
+      "description": "Technical projects, industry connections, and professional development for engineering students",
+      "keywords": ["electrical engineering", "computer engineering", "technology", "circuits", "engineering", "computing"]
+    },
+    {
+      "name": "Engineers Without Borders at UGA",
+      "category": "Engineering & Service",
+      "description": "International development engineering projects addressing infrastructure and sustainability challenges",
+      "keywords": ["engineering", "service", "international", "sustainability", "civil engineering", "global health", "development"]
+    },
+    {
+      "name": "UGA Robotics Club",
+      "category": "Engineering & STEM",
+      "description": "Hands-on robotics design, build, and competition for engineering and CS students",
+      "keywords": ["robotics", "engineering", "computer science", "automation", "mechanical", "programming", "technology"]
+    },
+    {
+      "name": "Terry Investment Fund",
+      "category": "Business & Finance",
+      "description": "Student-managed real equity portfolio giving hands-on investment and portfolio management experience",
+      "keywords": ["finance", "investment", "business", "economics", "markets", "portfolio", "banking", "equity"]
+    },
+    {
+      "name": "American Marketing Association (AMA) at UGA",
+      "category": "Business & Marketing",
+      "description": "Marketing case competitions, brand strategy workshops, and connections to marketing professionals",
+      "keywords": ["marketing", "business", "advertising", "brand", "communication", "strategy", "digital marketing"]
+    },
+    {
+      "name": "Financial Management Association (FMA) at UGA",
+      "category": "Business & Finance",
+      "description": "Finance careers, CFA preparation, networking with financial professionals, and industry events",
+      "keywords": ["finance", "financial management", "business", "accounting", "investment", "economics", "banking"]
+    },
+    {
+      "name": "Terry Consulting Group",
+      "category": "Business & Consulting",
+      "description": "Student-run consulting firm providing pro-bono strategy consulting to Athens businesses and nonprofits",
+      "keywords": ["consulting", "business", "strategy", "management", "problem solving", "analytics", "business development"]
+    },
+    {
+      "name": "Enactus UGA",
+      "category": "Business & Entrepreneurship",
+      "description": "Social entrepreneurship projects using business principles to create community impact",
+      "keywords": ["entrepreneurship", "social impact", "business", "nonprofit", "innovation", "leadership", "community"]
+    },
+    {
+      "name": "UGA Entrepreneurship Club",
+      "category": "Entrepreneurship & Innovation",
+      "description": "Startup pitches, founder speaker series, business plan competitions, and venture ecosystem exposure",
+      "keywords": ["entrepreneurship", "startup", "innovation", "business", "venture capital", "product", "leadership"]
+    },
+    {
+      "name": "Delta Sigma Pi",
+      "category": "Business & Professional",
+      "description": "Co-ed professional business fraternity offering networking, mentorship, and career development",
+      "keywords": ["business", "professional development", "networking", "management", "finance", "marketing", "leadership"]
+    },
+    {
+      "name": "Society for Human Resource Management (SHRM) at UGA",
+      "category": "Business & HR",
+      "description": "HR career development, SHRM certification prep, and professional networking in people management",
+      "keywords": ["human resources", "HR", "management", "business", "organizational behavior", "leadership", "psychology"]
+    },
+    {
+      "name": "UGA Real Estate Society",
+      "category": "Business & Finance",
+      "description": "Real estate investment, development, and career exploration through site tours and industry speakers",
+      "keywords": ["real estate", "finance", "investment", "business", "economics", "property", "development"]
+    },
+    {
+      "name": "Beta Alpha Psi at UGA",
+      "category": "Business & Accounting",
+      "description": "Honors accounting and finance organization focused on professional development and CPA preparation",
+      "keywords": ["accounting", "finance", "business", "CPA", "audit", "tax", "professional"]
+    },
+    {
+      "name": "Public Relations Student Society of America (PRSSA) at UGA",
+      "category": "Media & Communications",
+      "description": "PR campaigns, industry connections, and professional development for communications and PR students",
+      "keywords": ["public relations", "PR", "communications", "media", "journalism", "marketing", "writing", "strategy"]
+    },
+    {
+      "name": "UGA Advertising Club",
+      "category": "Media & Marketing",
+      "description": "Creative advertising projects, portfolio development, and connections to ad industry professionals",
+      "keywords": ["advertising", "marketing", "creative", "design", "media", "communication", "branding"]
+    },
+    {
+      "name": "UGA Mock Trial",
+      "category": "Pre-Law & Legal",
+      "description": "Competitive collegiate mock trial program developing argumentation, advocacy, and courtroom skills",
+      "keywords": ["law", "pre-law", "legal", "argumentation", "advocacy", "public speaking", "criminal justice", "trial"]
+    },
+    {
+      "name": "Phi Alpha Delta (Pre-Law)",
+      "category": "Pre-Law & Legal",
+      "description": "Pre-law honor society with LSAT prep, law school application guidance, and attorney networking",
+      "keywords": ["law", "pre-law", "legal", "LSAT", "law school", "criminal justice", "policy", "advocacy"]
+    },
+    {
+      "name": "UGA Pre-Law Society",
+      "category": "Pre-Law & Legal",
+      "description": "Legal career exploration, law school application workshops, and attorney speaker events",
+      "keywords": ["law", "pre-law", "legal", "policy", "criminal justice", "advocacy", "LSAT"]
+    },
+    {
+      "name": "Georgia Model United Nations (GAMUN)",
+      "category": "International Affairs & Policy",
+      "description": "Competitive Model UN program building diplomacy, research, and international policy skills",
+      "keywords": ["international affairs", "diplomacy", "policy", "political science", "global", "public speaking", "debate", "international relations"]
+    },
+    {
+      "name": "UGA Debate",
+      "category": "Communication & Policy",
+      "description": "Competitive parliamentary and policy debate developing research, argumentation, and public speaking",
+      "keywords": ["debate", "public speaking", "argumentation", "policy", "political science", "communication", "law"]
+    },
+    {
+      "name": "UGA College Democrats",
+      "category": "Politics & Civic Engagement",
+      "description": "Political engagement, voter registration drives, campaign volunteering, and progressive policy advocacy",
+      "keywords": ["politics", "political science", "civic engagement", "policy", "government", "advocacy", "public service"]
+    },
+    {
+      "name": "UGA College Republicans",
+      "category": "Politics & Civic Engagement",
+      "description": "Political engagement, conservative policy discussion, voter outreach, and Republican campaign support",
+      "keywords": ["politics", "political science", "civic engagement", "policy", "government", "advocacy", "public service"]
+    },
+    {
+      "name": "Georgia Political Review",
+      "category": "Politics & Media",
+      "description": "Student-run political magazine publishing analysis of Georgia and national policy issues",
+      "keywords": ["political science", "journalism", "policy", "writing", "media", "research", "politics", "public affairs"]
+    },
+    {
+      "name": "UGA Undergraduate Mock Congress",
+      "category": "Politics & Policy",
+      "description": "Simulated legislative experience drafting and debating policy bills",
+      "keywords": ["political science", "government", "policy", "law", "public service", "civic engagement"]
+    },
+    {
+      "name": "Medical Academic Preparation Society (MAPS) at UGA",
+      "category": "Pre-Health",
+      "description": "Pre-med community with MCAT prep, shadowing coordination, and medical school application support",
+      "keywords": ["pre-med", "medicine", "health", "biology", "chemistry", "MCAT", "healthcare", "medical school"]
+    },
+    {
+      "name": "American Medical Student Association (AMSA) at UGA",
+      "category": "Pre-Health",
+      "description": "Healthcare advocacy, community health projects, and professional development for pre-med students",
+      "keywords": ["medicine", "healthcare", "pre-med", "health policy", "biology", "public health", "advocacy"]
+    },
+    {
+      "name": "Pre-Dental Society at UGA",
+      "category": "Pre-Health",
+      "description": "DAT prep, dental school guidance, shadowing opportunities, and community dental outreach",
+      "keywords": ["dentistry", "pre-dental", "health", "biology", "chemistry", "healthcare"]
+    },
+    {
+      "name": "Pre-Veterinary Society at UGA",
+      "category": "Pre-Health",
+      "description": "Vet school preparation, animal clinic shadowing, and community for pre-vet students",
+      "keywords": ["veterinary", "pre-vet", "animals", "biology", "health", "animal science"]
+    },
+    {
+      "name": "UGA Public Health Association",
+      "category": "Public Health",
+      "description": "Community health education, public health research, and advocacy for population health equity",
+      "keywords": ["public health", "health", "community", "policy", "epidemiology", "health promotion", "global health"]
+    },
+    {
+      "name": "UGA Global Health Collective",
+      "category": "Public Health & International",
+      "description": "Global health research, international health equity projects, and career development in global health",
+      "keywords": ["global health", "international", "public health", "medicine", "policy", "development", "equity"]
+    },
+    {
+      "name": "UGA Psychology Association",
+      "category": "Academic & Psychology",
+      "description": "Psychology research, mental health awareness, and graduate school preparation for psychology students",
+      "keywords": ["psychology", "mental health", "research", "neuroscience", "counseling", "cognitive science", "behavior"]
+    },
+    {
+      "name": "Active Minds at UGA",
+      "category": "Mental Health & Wellness",
+      "description": "Campus mental health advocacy, stigma reduction programming, and peer support community",
+      "keywords": ["mental health", "psychology", "counseling", "wellness", "advocacy", "community", "health"]
+    },
+    {
+      "name": "Neuroscience Society at UGA",
+      "category": "Academic & Science",
+      "description": "Brain science research discussions, seminars, and graduate school preparation for neuroscience students",
+      "keywords": ["neuroscience", "biology", "psychology", "cognitive science", "research", "medicine", "brain"]
+    },
+    {
+      "name": "UGA Economics Society",
+      "category": "Academic & Business",
+      "description": "Economics research, policy discussions, and career development for economics students",
+      "keywords": ["economics", "policy", "finance", "research", "business", "data", "statistics"]
+    },
+    {
+      "name": "UGA Philosophy Club",
+      "category": "Academic & Humanities",
+      "description": "Ethics, logic, and philosophy discussions open to all — faculty-moderated Socratic seminars",
+      "keywords": ["philosophy", "ethics", "logic", "humanities", "critical thinking", "law", "political theory"]
+    },
+    {
+      "name": "UGA Sociology Association",
+      "category": "Academic & Social Sciences",
+      "description": "Social research workshops, community engagement, and professional development for sociology students",
+      "keywords": ["sociology", "social work", "community", "research", "social justice", "policy", "public health"]
+    },
+    {
+      "name": "UGA Linguistics Society",
+      "category": "Academic & Humanities",
+      "description": "Language research, computational linguistics, and career exploration in linguistics and NLP",
+      "keywords": ["linguistics", "language", "computational linguistics", "NLP", "communication", "cognitive science", "research"]
+    },
+    {
+      "name": "UGA History Club",
+      "category": "Academic & Humanities",
+      "description": "Historical discussion, public history projects, and graduate school preparation for history students",
+      "keywords": ["history", "humanities", "research", "writing", "law", "political science", "culture"]
+    },
+    {
+      "name": "Miracle Network Dance Marathon at UGA",
+      "category": "Service & Philanthropy",
+      "description": "Year-long philanthropy fundraising for Children's Miracle Network Hospitals culminating in a 24-hour dance marathon",
+      "keywords": ["service", "fundraising", "healthcare", "leadership", "community", "events", "nonprofit"]
+    },
+    {
+      "name": "Habitat for Humanity at UGA",
+      "category": "Service & Community",
+      "description": "Affordable housing construction builds in Athens and advocacy for housing equity",
+      "keywords": ["service", "community", "housing", "social justice", "construction", "advocacy", "nonprofit"]
+    },
+    {
+      "name": "Relay For Life at UGA",
+      "category": "Service & Philanthropy",
+      "description": "American Cancer Society's flagship campus fundraiser and cancer awareness event",
+      "keywords": ["service", "fundraising", "health", "community", "event planning", "nonprofit", "cancer"]
+    },
+    {
+      "name": "Alpha Phi Omega",
+      "category": "Service",
+      "description": "Co-ed national service fraternity completing community service hours across Athens and UGA",
+      "keywords": ["service", "community", "leadership", "volunteering", "nonprofit", "social work"]
+    },
+    {
+      "name": "UGA Food Bank (Dawg Pantry)",
+      "category": "Service & Community",
+      "description": "Campus food bank addressing food insecurity among UGA students and Athens community members",
+      "keywords": ["service", "community", "social work", "nonprofit", "food security", "public health", "advocacy"]
+    },
+    {
+      "name": "UGA Advocates for Sexual Assault Prevention (ASAP)",
+      "category": "Advocacy & Social Justice",
+      "description": "Prevention education, survivor support advocacy, and campus policy reform around sexual violence",
+      "keywords": ["advocacy", "social justice", "public health", "counseling", "policy", "community", "gender studies"]
+    },
+    {
+      "name": "Student Government Association (SGA) at UGA",
+      "category": "Student Leadership & Government",
+      "description": "Elected student government representing student interests to university administration and allocating student fees",
+      "keywords": ["leadership", "government", "political science", "policy", "advocacy", "community", "public service"]
+    },
+    {
+      "name": "Black Student Union (BSU) at UGA",
+      "category": "Cultural & Identity",
+      "description": "Community, cultural programming, and advocacy for Black students at UGA",
+      "keywords": ["culture", "social justice", "community", "advocacy", "African American studies", "leadership", "diversity"]
+    },
+    {
+      "name": "NAACP at UGA",
+      "category": "Civil Rights & Advocacy",
+      "description": "Civil rights advocacy, voter registration, and social justice programming on campus",
+      "keywords": ["civil rights", "advocacy", "social justice", "political science", "community", "law", "policy"]
+    },
+    {
+      "name": "Hispanic Student Association (HSA) at UGA",
+      "category": "Cultural & Identity",
+      "description": "Cultural programming, community support, and advocacy for Hispanic and Latinx students",
+      "keywords": ["hispanic", "latinx", "culture", "community", "Spanish", "advocacy", "international", "diversity"]
+    },
+    {
+      "name": "Asian American Association (AAA) at UGA",
+      "category": "Cultural & Identity",
+      "description": "Community, cultural events, and advocacy for Asian American students at UGA",
+      "keywords": ["Asian American", "culture", "community", "diversity", "advocacy", "international"]
+    },
+    {
+      "name": "UGA International Student Association",
+      "category": "Cultural & International",
+      "description": "Community and cultural exchange for international students and those interested in global perspectives",
+      "keywords": ["international", "global", "culture", "diversity", "exchange", "languages", "community"]
+    },
+    {
+      "name": "UGA African Student Association",
+      "category": "Cultural & International",
+      "description": "Community, cultural events, and networking for African students and those interested in African culture",
+      "keywords": ["African", "culture", "international", "community", "diversity", "advocacy"]
+    },
+    {
+      "name": "UGA Korean Student Association",
+      "category": "Cultural & International",
+      "description": "Korean culture, language exchange, and community for Korean and Korean-American students",
+      "keywords": ["Korean", "culture", "international", "language", "community", "Asian"]
+    },
+    {
+      "name": "UGA Indian Cultural Exchange (ICE)",
+      "category": "Cultural & International",
+      "description": "South Asian cultural programming, Diwali celebrations, and community for Indian students and allies",
+      "keywords": ["Indian", "South Asian", "culture", "international", "community", "diversity"]
+    },
+    {
+      "name": "UGA Chinese Student Association",
+      "category": "Cultural & International",
+      "description": "Chinese culture, language exchange, and community support for Chinese students at UGA",
+      "keywords": ["Chinese", "culture", "international", "language", "community", "Asian"]
+    },
+    {
+      "name": "UGA Muslim Student Association (MSA)",
+      "category": "Cultural & Religious",
+      "description": "Islamic faith community, interfaith dialogue, and cultural programming for Muslim students",
+      "keywords": ["Muslim", "Islamic", "culture", "religion", "community", "interfaith", "diversity"]
+    },
+    {
+      "name": "UGA Hillel",
+      "category": "Cultural & Religious",
+      "description": "Jewish student life, Israel advocacy, Shabbat programming, and interfaith dialogue at UGA",
+      "keywords": ["Jewish", "culture", "religion", "community", "interfaith", "advocacy", "Israel"]
+    },
+    {
+      "name": "UGA Pride Alliance",
+      "category": "LGBTQ+ & Advocacy",
+      "description": "LGBTQ+ community, advocacy, programming, and safe space for queer students and allies",
+      "keywords": ["LGBTQ", "advocacy", "diversity", "community", "social justice", "gender studies", "women's studies"]
+    },
+    {
+      "name": "UGA Environmental Society",
+      "category": "Environment & Sustainability",
+      "description": "Environmental advocacy, sustainability campaigns, and ecological awareness on campus and in Athens",
+      "keywords": ["environment", "sustainability", "ecology", "climate", "advocacy", "biology", "policy"]
+    },
+    {
+      "name": "UGA Wildlife Society",
+      "category": "Environment & Science",
+      "description": "Wildlife biology field trips, conservation research, and career development in wildlife management",
+      "keywords": ["wildlife", "biology", "ecology", "conservation", "environment", "animal science", "research"]
+    },
+    {
+      "name": "UGA Horticulture Club",
+      "category": "Agriculture & Science",
+      "description": "Plant science, sustainable gardening projects, and networking in horticulture and plant industries",
+      "keywords": ["horticulture", "plants", "agriculture", "biology", "sustainability", "food", "environment"]
+    },
+    {
+      "name": "UGA Beekeeping Club",
+      "category": "Agriculture & Science",
+      "description": "Hands-on beekeeping experience, pollinator conservation education, and honey production",
+      "keywords": ["beekeeping", "agriculture", "biology", "ecology", "sustainability", "environment", "food science"]
+    },
+    {
+      "name": "UGA Pre-Pharmacy Club",
+      "category": "Pre-Health",
+      "description": "PharmD program preparation, pharmacy shadowing opportunities, and PCAT prep community",
+      "keywords": ["pharmacy", "pre-pharmacy", "chemistry", "health", "biology", "pharmaceutical", "medicine"]
+    },
+    {
+      "name": "UGA Photography Club",
+      "category": "Arts & Media",
+      "description": "Photography workshops, gallery exhibitions, and portfolio development for visual storytellers",
+      "keywords": ["photography", "art", "media", "visual", "design", "creative", "digital media"]
+    },
+    {
+      "name": "UGA Film Association",
+      "category": "Arts & Media",
+      "description": "Short film production, screenwriting workshops, and film industry career development",
+      "keywords": ["film", "media", "screenwriting", "production", "creative", "storytelling", "entertainment", "art"]
+    },
+    {
+      "name": "UGA Theatre Guild",
+      "category": "Arts & Performance",
+      "description": "Student-produced theatrical performances, directing, stage design, and acting workshops",
+      "keywords": ["theatre", "drama", "performance", "arts", "acting", "directing", "creative", "entertainment"]
+    },
+    {
+      "name": "UGA Symphony Orchestra",
+      "category": "Arts & Music",
+      "description": "University orchestra for music students and talented non-music majors",
+      "keywords": ["music", "orchestra", "performance", "arts", "classical", "instrument"]
+    },
+    {
+      "name": "UGA Ballroom Dance Team",
+      "category": "Arts & Dance",
+      "description": "Competitive ballroom and Latin dance with intercollegiate competitions",
+      "keywords": ["dance", "performance", "arts", "competition", "physical", "culture"]
+    },
+    {
+      "name": "UGA Creative Writing Club",
+      "category": "Arts & Writing",
+      "description": "Fiction, poetry, and creative nonfiction workshops with peer critique and publication opportunities",
+      "keywords": ["writing", "creative writing", "fiction", "poetry", "English", "literature", "journalism", "publishing"]
+    },
+    {
+      "name": "Society of Physics Students at UGA",
+      "category": "Academic & STEM",
+      "description": "Physics research seminars, graduate school prep, and community for physics and astronomy students",
+      "keywords": ["physics", "astronomy", "research", "STEM", "mathematics", "engineering", "graduate school"]
+    },
+    {
+      "name": "American Chemical Society (ACS) Student Chapter at UGA",
+      "category": "Academic & STEM",
+      "description": "Chemistry research, graduate school preparation, and networking in chemical sciences and industry",
+      "keywords": ["chemistry", "research", "STEM", "pharmaceutical", "biochemistry", "graduate school", "laboratory"]
+    },
+    {
+      "name": "UGA Math Club",
+      "category": "Academic & STEM",
+      "description": "Mathematical problem-solving competitions, Putnam prep, and community for math enthusiasts",
+      "keywords": ["mathematics", "statistics", "data science", "research", "STEM", "problem solving", "computing"]
+    },
+    {
+      "name": "UGA Statistics Club",
+      "category": "Academic & STEM",
+      "description": "Applied statistics projects, data analysis competitions, and career development in data-driven fields",
+      "keywords": ["statistics", "data science", "mathematics", "research", "analytics", "computing", "machine learning"]
+    },
+    {
+      "name": "UGA Biology Club",
+      "category": "Academic & Science",
+      "description": "Biological research discussions, graduate school prep, and networking for biology students",
+      "keywords": ["biology", "research", "pre-med", "ecology", "genetics", "molecular biology", "graduate school"]
+    },
+    {
+      "name": "UGA Geology Club",
+      "category": "Academic & Science",
+      "description": "Field geology trips, environmental earth science projects, and career exploration in geosciences",
+      "keywords": ["geology", "earth science", "environment", "geography", "research", "field work", "sustainability"]
+    },
+    {
+      "name": "UGA Astronomy Club",
+      "category": "Academic & Science",
+      "description": "Stargazing events, telescope use, and astrophysics discussions open to all students",
+      "keywords": ["astronomy", "physics", "space", "STEM", "science", "research", "astrophysics"]
+    },
+    {
+      "name": "UGA Geography Club",
+      "category": "Academic & Social Sciences",
+      "description": "GIS mapping, environmental geography, and career exploration in planning, urban development, and cartography",
+      "keywords": ["geography", "GIS", "urban planning", "environment", "sustainability", "mapping", "data"]
+    },
+    {
+      "name": "UGA Political Science Association",
+      "category": "Academic & Political Science",
+      "description": "Political research, guest speakers, and graduate and law school prep for political science students",
+      "keywords": ["political science", "government", "policy", "law", "research", "international affairs", "public service"]
+    },
+    {
+      "name": "UGA Supply Chain and Logistics Club",
+      "category": "Business & Operations",
+      "description": "Operations management, supply chain case competitions, and networking with logistics professionals",
+      "keywords": ["supply chain", "logistics", "operations", "business", "management", "analytics", "systems"]
+    },
+    {
+      "name": "UGA Outdoor Recreation Club",
+      "category": "Recreation & Wellness",
+      "description": "Camping, hiking, whitewater kayaking, and outdoor adventure trips in the Southeast",
+      "keywords": ["outdoor", "recreation", "hiking", "environment", "wellness", "adventure", "sustainability"]
+    },
+    {
+      "name": "UGA Running Club",
+      "category": "Recreation & Wellness",
+      "description": "Group training runs, 5K and half-marathon race preparation, and wellness community",
+      "keywords": ["running", "fitness", "wellness", "health", "sport", "community"]
+    },
+    {
+      "name": "UGA Cycling Club",
+      "category": "Recreation & Wellness",
+      "description": "Road and mountain biking, group rides, and cycling advocacy in Athens",
+      "keywords": ["cycling", "fitness", "wellness", "sustainability", "sport", "recreation"]
+    },
+    {
+      "name": "UGA Chess Club",
+      "category": "Recreation & Academic",
+      "description": "Competitive and casual chess with intercollegiate tournaments and skill development",
+      "keywords": ["chess", "strategy", "competition", "problem solving", "mathematics", "logic"]
+    },
+    {
+      "name": "UGA Esports",
+      "category": "Recreation & Technology",
+      "description": "Competitive gaming across multiple titles with university-sponsored intercollegiate tournaments",
+      "keywords": ["gaming", "esports", "technology", "competition", "entertainment", "media", "computer science"]
+    },
+    {
+      "name": "UGA Investment Society",
+      "category": "Business & Finance",
+      "description": "Stock pitch competitions, financial modeling workshops, and investment career development",
+      "keywords": ["investment", "finance", "economics", "markets", "business", "banking", "equity", "analysis"]
+    },
+    {
+      "name": "Net Impact at UGA",
+      "category": "Business & Social Impact",
+      "description": "Business and social impact consulting, sustainability careers, and mission-driven business development",
+      "keywords": ["social impact", "sustainability", "business", "nonprofit", "consulting", "ESG", "environment", "policy"]
+    },
+    {
+      "name": "UGA Pre-Occupational Therapy Club",
+      "category": "Pre-Health",
+      "description": "Occupational therapy career exploration, shadowing coordination, and OT graduate program preparation",
+      "keywords": ["occupational therapy", "health", "rehabilitation", "psychology", "pre-health", "medicine"]
+    },
+    {
+      "name": "UGA Global Brigades",
+      "category": "International Service",
+      "description": "Medical, dental, public health, and business brigades providing services in developing communities",
+      "keywords": ["global health", "international", "service", "medicine", "public health", "development", "nonprofit"]
+    },
+    {
+      "name": "Amnesty International at UGA",
+      "category": "Advocacy & Human Rights",
+      "description": "Human rights campaigns, political prisoner advocacy, and international justice programming",
+      "keywords": ["human rights", "advocacy", "international affairs", "law", "policy", "social justice", "global"]
+    },
+    {
+      "name": "Rotaract Club at UGA",
+      "category": "Service & Leadership",
+      "description": "Rotary International's young professional service club with community projects and global networking",
+      "keywords": ["service", "leadership", "community", "international", "networking", "professional development", "nonprofit"]
+    },
+    {
+      "name": "UGA Speech and Hearing Sciences Club",
+      "category": "Pre-Health & Communication",
+      "description": "Career preparation in speech-language pathology and audiology with clinical shadowing opportunities",
+      "keywords": ["speech", "communication disorders", "health", "audiology", "pre-health", "linguistics", "psychology"]
+    },
+    {
+      "name": "UGA Student Wellness Ambassadors",
+      "category": "Health & Wellness",
+      "description": "Peer health education on nutrition, mental health, sexual health, and substance awareness",
+      "keywords": ["health", "wellness", "public health", "mental health", "education", "community", "advocacy"]
+    },
+    {
+      "name": "UGA Student Alumni Council",
+      "category": "Networking & Professional",
+      "description": "Bridges current students with UGA alumni network for mentorship, networking, and career connections",
+      "keywords": ["networking", "professional development", "alumni", "career", "mentorship", "business", "leadership"]
+    },
+    {
+      "name": "UGA Undergraduate Research Journal",
+      "category": "Academic & Research",
+      "description": "Peer-reviewed publication platform for undergraduate research across all disciplines",
+      "keywords": ["research", "writing", "publishing", "academic", "science", "humanities", "graduate school"]
+    }
+  ]
+}
