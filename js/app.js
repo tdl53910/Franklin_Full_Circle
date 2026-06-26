@@ -821,7 +821,6 @@ async function fetchMoreContacts() {
 function renderClubs() {
     const el = $('clubList');
     el.innerHTML = clubs.map((c, i) => {
-        const url = buildEngageUrl(c.slug, c.name);
         return `
         <li class="club-item">
             <button class="item-x" onclick="removeClub(${i})" aria-label="Remove">
@@ -829,7 +828,6 @@ function renderClubs() {
             </button>
             <div class="club-name">${esc(c.name)}</div>
             <div class="club-description">${esc(c.description)}</div>
-            <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="club-link">Search on UGA Engage →</a>
         </li>`;
     }).join('');
     el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreClubs()">+ Add more organizations</button>`;
