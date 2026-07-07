@@ -214,8 +214,8 @@ body {
 .grid-item[data-grid="contacts"],
 .grid-item[data-grid="clubs"]    { grid-column: span 3; }
 .grid-item[data-grid="news"],
-.grid-item[data-grid="chat"],
-.grid-item[data-grid="opportunities"] { grid-column: span 4; }
+.grid-item[data-grid="chat"] { grid-column: span 4; }
+.grid-item[data-grid="opportunities"] { grid-column: span 5; }
 
 /* Item Headers */
 .item-header {
@@ -976,6 +976,7 @@ select:focus-visible {
     .grid-item[data-grid="news"],
     .grid-item[data-grid="chat"],
     .grid-item[data-grid="opportunities"] { grid-column: span 3; }
+
 }
 @media (max-width:768px) {
     .header-content { flex-direction: column; height: auto; padding: 0.72rem 1rem; gap: 0.4rem; text-align: center; }
