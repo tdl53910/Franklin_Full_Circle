@@ -1239,17 +1239,33 @@ function downloadPDF() {
     const jsPDF = window.jspdf?.jsPDF;
     if (!jsPDF) { showToast('PDF library loading…', 'error'); return; }
 
-    const doc  = new jsPDF({ unit: 'pt', format: 'letter' });
-    const PW   = 612, PH = 792;
-    const ML   = 58,  MR = 58;
-    const TW   = PW - ML - MR;      // 496pt usable text width
-    const HEADER_H = 114;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const PW = 612, PH = 792;
+    const ML = 58,  MR = 58;
+    const TW = PW - ML - MR;   // 496pt body text width
+
+    // Left column stops here so right column (label + date) never overlaps
+    const LEFT_W  = TW - 150;  // 346pt
+    const RIGHT_X = PW - MR;   // 554pt, right-aligned anchor
 
     const RED   = [186, 12, 47];
     const DARK  = [20,  23, 28];
     const MID   = [60,  70, 90];
     const MUTED = [138, 146, 164];
     const WHITE = [255, 255, 255];
+    const W85   = [220, 225, 235];  // white 85%
+    const W65   = [180, 188, 205];  // white 65%
+    const W50   = [155, 163, 182];  // white 50%
+
+    // Pre-measure program line at 10.5pt Times so we can size the header correctly
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10.5);
+    const prog = [studentData.major, studentData.year].filter(Boolean).join('  ·  ');
+    const progLines = prog ? doc.splitTextToSize(prog, LEFT_W) : [];
+
+    // Header grows to fit wrapped program text
+    // Base: name(38) + first prog line(16) + institution(14) + bottom padding(20) + stripe(3)
+    const HEADER_H = 91 + Math.max(0, progLines.length - 1) * 14;
 
     let y = 0, pageNum = 1;
 
@@ -1262,7 +1278,7 @@ function downloadPDF() {
         doc.line(ML, PH - 40, PW - MR, PH - 40);
         doc.text('Franklin Full Circle  ·  University of Georgia', ML, PH - 27);
         doc.text(String(pageNum), PW / 2, PH - 27, { align: 'center' });
-        doc.text(studentData.name || '', PW - MR, PH - 27, { align: 'right' });
+        doc.text(studentData.name || '', RIGHT_X, PH - 27, { align: 'right' });
     }
 
     function checkPage(need) {
@@ -1274,75 +1290,73 @@ function downloadPDF() {
         }
     }
 
-    // ── HEADER BAND ─────────────────────────────────────────────
-    doc.setFillColor(20, 23, 28);
+    // ── HEADER BAND (UGA RED) ────────────────────────────────────
+    doc.setFillColor(...RED);
     doc.rect(0, 0, PW, HEADER_H, 'F');
 
-    // UGA red bottom stripe
-    doc.setFillColor(...RED);
+    // Darker stripe at base of header
+    doc.setFillColor(130, 8, 32);
     doc.rect(0, HEADER_H - 3, PW, 3, 'F');
 
     // Student name
     doc.setFont('times', 'bold');
     doc.setFontSize(22);
     doc.setTextColor(...WHITE);
-    doc.text(studentData.name || 'Student', ML, 40);
+    doc.text(studentData.name || 'Student', ML, 38);
 
-    // Program line
+    // Program line(s) — wrapped to LEFT_W so they never reach the right column
     doc.setFont('times', 'normal');
     doc.setFontSize(10.5);
-    doc.setTextColor(195, 202, 218);
-    const prog = [studentData.major, studentData.year].filter(Boolean).join('  ·  ');
-    if (prog) doc.text(prog, ML, 58);
+    doc.setTextColor(...W85);
+    let progY = 54;
+    progLines.forEach(line => { doc.text(line, ML, progY); progY += 14; });
 
-    // Institution
+    // Institution — sits below the last program line
     doc.setFont('times', 'italic');
     doc.setFontSize(9);
-    doc.setTextColor(145, 154, 172);
-    doc.text('Franklin College of Arts & Sciences  ·  University of Georgia', ML, 74);
+    doc.setTextColor(...W65);
+    doc.text('Franklin College of Arts & Sciences  ·  University of Georgia', ML, progY + 1);
 
-    // Right column: label + date
+    // Right column: label + date (anchored at top of header, right-aligned)
     doc.setFont('times', 'bold');
     doc.setFontSize(7.5);
-    doc.setTextColor(...RED);
-    doc.text('CAREER DOSSIER', PW - MR, 40, { align: 'right' });
+    doc.setTextColor(...W50);
+    doc.text('CAREER DOSSIER', RIGHT_X, 38, { align: 'right' });
 
     doc.setFont('times', 'normal');
     doc.setFontSize(8.5);
-    doc.setTextColor(155, 164, 182);
-    doc.text(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), PW - MR, 57, { align: 'right' });
+    doc.setTextColor(...W65);
+    doc.text(
+        new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        RIGHT_X, 52, { align: 'right' }
+    );
 
-    y = HEADER_H + 28;
-
-    // Draw footer for page 1
+    y = HEADER_H + 26;
     drawFooter();
 
     // ── BODY SECTIONS ───────────────────────────────────────────
     const sections = [
-        ['Overview & Natural Proclivities', generatedDossier.overview],
-        ['Tier One — Primary Pathways',     generatedDossier.tier1],
-        ['Tier Two — Emerging Opportunities', generatedDossier.tier2],
-        ['Tier Three — Exploratory Options',  generatedDossier.tier3],
-        ['Strategic Recommendations',         generatedDossier.summary]
+        ['Overview & Natural Proclivities',    generatedDossier.overview],
+        ['Tier One — Primary Pathways',        generatedDossier.tier1],
+        ['Tier Two — Emerging Opportunities',  generatedDossier.tier2],
+        ['Tier Three — Exploratory Options',   generatedDossier.tier3],
+        ['Strategic Recommendations',          generatedDossier.summary]
     ];
 
     sections.forEach(([title, text]) => {
         if (!text) return;
         checkPage(64);
 
-        // Red left-bar accent (mirrors web UI)
+        // Red left-bar accent — mirrors the web dossier sections
         doc.setFillColor(...RED);
         doc.rect(ML, y - 12, 3, 16, 'F');
 
-        // Section heading
         doc.setFont('times', 'bold');
         doc.setFontSize(12);
         doc.setTextColor(...DARK);
         doc.text(title, ML + 10, y);
-
         y += 17;
 
-        // Body text
         doc.setFont('times', 'normal');
         doc.setFontSize(10.5);
         doc.setTextColor(...MID);
@@ -1355,8 +1369,7 @@ function downloadPDF() {
         y += 20;
     });
 
-    const filename = (studentData.name || 'Student').replace(/\s+/g, '_') + '_Career_Dossier.pdf';
-    doc.save(filename);
+    doc.save((studentData.name || 'Student').replace(/\s+/g, '_') + '_Career_Dossier.pdf');
     showToast('PDF downloaded.', 'success');
 }
 
