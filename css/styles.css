@@ -12,7 +12,7 @@
     --white: #FFFFFF;
     --surface: #F3F4F6;
     --panel: #FFFFFF;
-    --header-bg: #16191E;
+    --header-bg: #BA0C2F;
 
     /* Ink scale — blue-biased neutrals */
     --ink-900: #14171C;
@@ -80,7 +80,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 2.5px solid var(--uga-red);
+    border-bottom: 2.5px solid rgba(0,0,0,0.2);
     box-shadow: 0 2px 16px rgba(0,0,0,0.24);
 }
 .header-content {
@@ -100,7 +100,7 @@ body {
 .logo-mark {
     width: 36px;
     height: 36px;
-    background: var(--uga-red);
+    background: rgba(255,255,255,0.18);
     color: var(--white);
     border-radius: 6px;
     display: flex;
@@ -111,7 +111,7 @@ body {
     font-weight: 700;
     letter-spacing: -0.5px;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(186,12,47,0.45);
+    border: 1.5px solid rgba(255,255,255,0.28);
 }
 .title h1 {
     font-family: var(--display);
@@ -900,7 +900,7 @@ select:focus-visible {
     :root {
         --surface: #0F1117;
         --panel: #1A1D26;
-        --header-bg: #0D0F14;
+        --header-bg: #910921;
         --ink-900: #EDF0F7;
         --ink-800: #D4D9E8;
         --ink-700: #B8BECE;
@@ -925,7 +925,7 @@ select:focus-visible {
 :root[data-theme="dark"] {
     --surface: #0F1117;
     --panel: #1A1D26;
-    --header-bg: #0D0F14;
+    --header-bg: #910921;
     --ink-900: #EDF0F7;
     --ink-800: #D4D9E8;
     --ink-700: #B8BECE;
@@ -949,7 +949,7 @@ select:focus-visible {
 :root[data-theme="light"] {
     --surface: #F3F4F6;
     --panel: #FFFFFF;
-    --header-bg: #16191E;
+    --header-bg: #BA0C2F;
     --ink-900: #14171C;
     --ink-800: #1E2330;
     --ink-700: #2D3449;
