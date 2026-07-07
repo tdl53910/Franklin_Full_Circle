@@ -215,7 +215,7 @@ body {
 .grid-item[data-grid="clubs"]    { grid-column: span 3; }
 .grid-item[data-grid="news"],
 .grid-item[data-grid="chat"],
-.grid-item[data-grid="opportunities"] { grid-column: span 4; }
+.grid-item[data-grid="opportunities"] { grid-column: span 6; }
 
 /* Item Headers */
 .item-header {
