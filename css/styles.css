@@ -269,7 +269,7 @@ body {
     border-bottom: 1px solid rgba(186,12,47,0.28);
 }
 .grid-item[data-grid="dossier"] .item-header h3 {
-    color: rgba(255,255,255,0.65);
+    color: #ffffff;
     letter-spacing: 0.8px;
 }
 .grid-item[data-grid="dossier"] .item-header h3 svg {
