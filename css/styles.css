@@ -281,7 +281,7 @@ body {
 .ghost-btn {
     background: transparent;
     border: 1px solid rgba(255,255,255,0.16);
-    color: rgba(255,255,255,0.52);
+    color: #ffffff;
     padding: 0.26rem 0.6rem;
     border-radius: var(--radius-sm);
     font-size: 0.62rem;
