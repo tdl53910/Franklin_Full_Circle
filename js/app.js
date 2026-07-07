@@ -1134,21 +1134,67 @@ function updateStats() {
 
 // ── drag & drop ──────────────────────────────────────────────
 function setupDragAndDrop() {
+    const grid = $('dashboardGrid');
+    let lastTarget = null;
+
     document.querySelectorAll('.grid-item').forEach(item => {
-        item.addEventListener('dragstart', function(e) { draggedItem = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-        item.addEventListener('dragend', function() { this.classList.remove('dragging'); document.querySelectorAll('.grid-item').forEach(i => i.classList.remove('over')); draggedItem = null; });
-        item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-        item.addEventListener('dragenter', function(e) { e.preventDefault(); if (this !== draggedItem) this.classList.add('over'); });
-        item.addEventListener('dragleave', function() { this.classList.remove('over'); });
-        item.addEventListener('drop', function(e) {
-            e.preventDefault(); this.classList.remove('over');
-            if (!draggedItem || this === draggedItem) return;
-            const grid = $('dashboardGrid');
-            const items = [...grid.children];
-            if (items.indexOf(draggedItem) < items.indexOf(this)) grid.insertBefore(draggedItem, this.nextSibling);
-            else grid.insertBefore(draggedItem, this);
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            lastTarget = null;
+            // defer so the browser can snapshot the drag image before opacity drops
+            requestAnimationFrame(() => this.classList.add('dragging'));
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            draggedItem = null;
+            lastTarget = null;
             saveGridPositions();
         });
+
+        item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+
+        item.addEventListener('dragenter', function(e) {
+            e.preventDefault();
+            if (!draggedItem || this === draggedItem || this === lastTarget) return;
+            lastTarget = this;
+
+            const items = [...grid.children];
+
+            // FLIP — snapshot positions before the DOM changes
+            const before = new Map(items.map(el => [el, el.getBoundingClientRect()]));
+
+            // Reorder live
+            if (items.indexOf(draggedItem) < items.indexOf(this)) {
+                grid.insertBefore(draggedItem, this.nextSibling);
+            } else {
+                grid.insertBefore(draggedItem, this);
+            }
+
+            // Animate every non-dragged card from its old position to its new one
+            [...grid.children].forEach(el => {
+                if (el === draggedItem) return;
+                const oldRect = before.get(el);
+                if (!oldRect) return;
+                const newRect = el.getBoundingClientRect();
+                const dx = oldRect.left - newRect.left;
+                const dy = oldRect.top  - newRect.top;
+                if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+
+                el.style.transition = 'none';
+                el.style.transform = `translate(${dx}px,${dy}px)`;
+                el.offsetHeight; // force reflow so the browser registers the starting position
+                el.style.transition = 'transform 0.2s ease';
+                el.style.transform = '';
+                el.addEventListener('transitionend', () => {
+                    el.style.transition = '';
+                    el.style.transform  = '';
+                }, { once: true });
+            });
+        });
+
+        item.addEventListener('drop', e => e.preventDefault());
     });
 }
 

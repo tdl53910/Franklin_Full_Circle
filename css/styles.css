@@ -207,7 +207,7 @@ body {
     box-shadow: var(--shadow-md);
     border-color: var(--ink-300);
 }
-.grid-item.dragging { opacity: 0.4; }
+.grid-item.dragging { opacity: 0.35; box-shadow: var(--shadow-xl); }
 .grid-item.over { border: 2px dashed var(--uga-red); background: var(--uga-red-soft); }
 
 .grid-item[data-grid="dossier"] { grid-column: span 6; grid-row: span 2; }
