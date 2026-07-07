@@ -1239,41 +1239,124 @@ function downloadPDF() {
     const jsPDF = window.jspdf?.jsPDF;
     if (!jsPDF) { showToast('PDF library loading…', 'error'); return; }
 
-    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-    const m = 50, w = 512;
-    let y = 50;
+    const doc  = new jsPDF({ unit: 'pt', format: 'letter' });
+    const PW   = 612, PH = 792;
+    const ML   = 58,  MR = 58;
+    const TW   = PW - ML - MR;      // 496pt usable text width
+    const HEADER_H = 114;
 
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
-    doc.setTextColor(186, 12, 47);
-    const titleLines = doc.splitTextToSize('Franklin Full Circle — Career Dossier', w);
-    doc.text(titleLines, m, y); y += titleLines.length * 20;
+    const RED   = [186, 12, 47];
+    const DARK  = [20,  23, 28];
+    const MID   = [60,  70, 90];
+    const MUTED = [138, 146, 164];
+    const WHITE = [255, 255, 255];
 
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-    doc.setTextColor(80, 80, 80);
-    const metaLines = doc.splitTextToSize(`${studentData.name}  ·  ${studentData.year}  ·  ${studentData.major}`, w);
-    doc.text(metaLines, m, y); y += metaLines.length * 13;
-    doc.text(`Generated ${new Date().toLocaleDateString()}`, m, y); y += 24;
+    let y = 0, pageNum = 1;
 
+    function drawFooter() {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...MUTED);
+        doc.setDrawColor(...MUTED);
+        doc.setLineWidth(0.3);
+        doc.line(ML, PH - 40, PW - MR, PH - 40);
+        doc.text('Franklin Full Circle  ·  University of Georgia', ML, PH - 27);
+        doc.text(String(pageNum), PW / 2, PH - 27, { align: 'center' });
+        doc.text(studentData.name || '', PW - MR, PH - 27, { align: 'right' });
+    }
+
+    function checkPage(need) {
+        if (y + need > PH - 58) {
+            drawFooter();
+            doc.addPage();
+            pageNum++;
+            y = 50;
+        }
+    }
+
+    // ── HEADER BAND ─────────────────────────────────────────────
+    doc.setFillColor(20, 23, 28);
+    doc.rect(0, 0, PW, HEADER_H, 'F');
+
+    // UGA red bottom stripe
+    doc.setFillColor(...RED);
+    doc.rect(0, HEADER_H - 3, PW, 3, 'F');
+
+    // Student name
+    doc.setFont('times', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(...WHITE);
+    doc.text(studentData.name || 'Student', ML, 40);
+
+    // Program line
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10.5);
+    doc.setTextColor(195, 202, 218);
+    const prog = [studentData.major, studentData.year].filter(Boolean).join('  ·  ');
+    if (prog) doc.text(prog, ML, 58);
+
+    // Institution
+    doc.setFont('times', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(145, 154, 172);
+    doc.text('Franklin College of Arts & Sciences  ·  University of Georgia', ML, 74);
+
+    // Right column: label + date
+    doc.setFont('times', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...RED);
+    doc.text('CAREER DOSSIER', PW - MR, 40, { align: 'right' });
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(155, 164, 182);
+    doc.text(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), PW - MR, 57, { align: 'right' });
+
+    y = HEADER_H + 28;
+
+    // Draw footer for page 1
+    drawFooter();
+
+    // ── BODY SECTIONS ───────────────────────────────────────────
     const sections = [
-        ['Overview', generatedDossier.overview],
-        ['Primary Pathways', generatedDossier.tier1],
-        ['Emerging Opportunities', generatedDossier.tier2],
-        ['Exploratory Options', generatedDossier.tier3],
-        ['Strategic Recommendations', generatedDossier.summary]
+        ['Overview & Natural Proclivities', generatedDossier.overview],
+        ['Tier One — Primary Pathways',     generatedDossier.tier1],
+        ['Tier Two — Emerging Opportunities', generatedDossier.tier2],
+        ['Tier Three — Exploratory Options',  generatedDossier.tier3],
+        ['Strategic Recommendations',         generatedDossier.summary]
     ];
 
     sections.forEach(([title, text]) => {
-        if (y > 700) { doc.addPage(); y = 50; }
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
-        doc.setTextColor(33, 37, 41);
-        doc.text(title, m, y); y += 14;
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
-        doc.setTextColor(73, 80, 87);
-        const lines = doc.splitTextToSize(text || '', w);
-        doc.text(lines, m, y); y += lines.length * 12 + 18;
+        if (!text) return;
+        checkPage(64);
+
+        // Red left-bar accent (mirrors web UI)
+        doc.setFillColor(...RED);
+        doc.rect(ML, y - 12, 3, 16, 'F');
+
+        // Section heading
+        doc.setFont('times', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(...DARK);
+        doc.text(title, ML + 10, y);
+
+        y += 17;
+
+        // Body text
+        doc.setFont('times', 'normal');
+        doc.setFontSize(10.5);
+        doc.setTextColor(...MID);
+        doc.splitTextToSize(text, TW).forEach(line => {
+            checkPage(15);
+            doc.text(line, ML, y);
+            y += 14;
+        });
+
+        y += 20;
     });
 
-    doc.save(`${studentData.name.replace(/\s+/g, '_')}_Dossier.pdf`);
+    const filename = (studentData.name || 'Student').replace(/\s+/g, '_') + '_Career_Dossier.pdf';
+    doc.save(filename);
     showToast('PDF downloaded.', 'success');
 }
 
