@@ -1137,65 +1137,87 @@ function setupDragAndDrop() {
     const grid = $('dashboardGrid');
     let lastTarget = null;
 
+    // Snap any in-flight FLIP animations to completion before measuring.
+    // getBoundingClientRect() returns the visual (transformed) position during
+    // a CSS transition, so mid-animation measurements corrupt the next FLIP.
+    function cancelInFlight() {
+        [...grid.children].forEach(el => {
+            el.style.transition = 'none';
+            el.style.transform  = '';
+        });
+        grid.offsetHeight; // force reflow to settle before next measurement
+    }
+
     document.querySelectorAll('.grid-item').forEach(item => {
         item.addEventListener('dragstart', function(e) {
             draggedItem = this;
-            lastTarget = null;
-            // defer so the browser can snapshot the drag image before opacity drops
+            lastTarget  = null;
+            // Defer so the browser captures the drag ghost before opacity drops
             requestAnimationFrame(() => this.classList.add('dragging'));
             e.dataTransfer.effectAllowed = 'move';
         });
 
         item.addEventListener('dragend', function() {
+            cancelInFlight();
             this.classList.remove('dragging');
             draggedItem = null;
-            lastTarget = null;
+            lastTarget  = null;
             saveGridPositions();
         });
-
-        item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-
-        item.addEventListener('dragenter', function(e) {
-            e.preventDefault();
-            if (!draggedItem || this === draggedItem || this === lastTarget) return;
-            lastTarget = this;
-
-            const items = [...grid.children];
-
-            // FLIP — snapshot positions before the DOM changes
-            const before = new Map(items.map(el => [el, el.getBoundingClientRect()]));
-
-            // Reorder live
-            if (items.indexOf(draggedItem) < items.indexOf(this)) {
-                grid.insertBefore(draggedItem, this.nextSibling);
-            } else {
-                grid.insertBefore(draggedItem, this);
-            }
-
-            // Animate every non-dragged card from its old position to its new one
-            [...grid.children].forEach(el => {
-                if (el === draggedItem) return;
-                const oldRect = before.get(el);
-                if (!oldRect) return;
-                const newRect = el.getBoundingClientRect();
-                const dx = oldRect.left - newRect.left;
-                const dy = oldRect.top  - newRect.top;
-                if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-
-                el.style.transition = 'none';
-                el.style.transform = `translate(${dx}px,${dy}px)`;
-                el.offsetHeight; // force reflow so the browser registers the starting position
-                el.style.transition = 'transform 0.2s ease';
-                el.style.transform = '';
-                el.addEventListener('transitionend', () => {
-                    el.style.transition = '';
-                    el.style.transform  = '';
-                }, { once: true });
-            });
-        });
-
-        item.addEventListener('drop', e => e.preventDefault());
     });
+
+    // Listen on the grid container — avoids duplicate fires from child elements
+    // inside each card triggering their parent's dragenter handler.
+    grid.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+
+    grid.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        if (!draggedItem) return;
+
+        const target = e.target.closest('.grid-item');
+
+        // Pointer moved into the grid background — reset so re-entering the
+        // same card later still triggers a reorder.
+        if (!target) { lastTarget = null; return; }
+        if (target === draggedItem || target === lastTarget) return;
+        lastTarget = target;
+
+        const cards = [...grid.children];
+
+        // Settle any in-flight animations so measurements are accurate
+        cancelInFlight();
+
+        const before = new Map(cards.map(el => [el, el.getBoundingClientRect()]));
+
+        // Live DOM reorder
+        const dragIdx   = cards.indexOf(draggedItem);
+        const targetIdx = cards.indexOf(target);
+        if (dragIdx < targetIdx) grid.insertBefore(draggedItem, target.nextSibling);
+        else                     grid.insertBefore(draggedItem, target);
+
+        // FLIP — animate each displaced card from its old rect to its new one
+        [...grid.children].forEach(el => {
+            if (el === draggedItem) return;
+            const old = before.get(el);
+            if (!old) return;
+            const now = el.getBoundingClientRect();
+            const dx  = old.left - now.left;
+            const dy  = old.top  - now.top;
+            if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+
+            el.style.transition = 'none';
+            el.style.transform  = `translate(${dx}px,${dy}px)`;
+            el.offsetHeight; // force reflow so start position is registered
+            el.style.transition = 'transform 0.18s ease';
+            el.style.transform  = '';
+            el.addEventListener('transitionend', () => {
+                el.style.transition = '';
+                el.style.transform  = '';
+            }, { once: true });
+        });
+    });
+
+    grid.addEventListener('drop', e => e.preventDefault());
 }
 
 function saveGridPositions() {
