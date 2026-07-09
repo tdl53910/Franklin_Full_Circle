@@ -214,7 +214,7 @@ body {
 .grid-item[data-grid="contacts"],
 .grid-item[data-grid="clubs"]    { grid-column: span 3; }
 .grid-item[data-grid="news"],
-.grid-item[data-grid="chat"] { grid-column: span 4; }
+.grid-item[data-grid="chat"] { grid-column: span 4; height: 480px; }
 .grid-item[data-grid="opportunities"] { grid-column: span 5; }
 
 /* Item Headers */
@@ -549,6 +549,7 @@ body {
 .chat-container { flex: 1; display: flex; flex-direction: column; height: 360px; }
 .chat-messages {
     flex: 1;
+    min-height: 0;
     padding: 0.75rem;
     overflow-y: auto;
     display: flex;
