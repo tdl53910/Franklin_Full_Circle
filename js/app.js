@@ -1525,7 +1525,7 @@ function downloadPDF() {
 
     // ── BODY SECTIONS ───────────────────────────────────────────
     const sections = [
-        ['Overview & Natural Proclivities',    generatedDossier.overview],
+        ['Overview & Proclivities',    generatedDossier.overview],
         ['Tier One — Primary Pathways',        generatedDossier.tier1],
         ['Tier Two — Emerging Opportunities',  generatedDossier.tier2],
         ['Tier Three — Exploratory Options',   generatedDossier.tier3],
