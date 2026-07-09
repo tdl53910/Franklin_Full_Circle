@@ -137,12 +137,6 @@ function buildEngageUrl(slug, name) {
     return `${ENGAGE_SEARCH}${encodeURIComponent(query)}`;
 }
 
-function buildNewsUrl(title, source) {
-    // AI can't generate real article URLs; link to a Google search instead
-    const query = `${(title || '').trim()} ${(source || '').trim()}`.trim();
-    if (!query) return null;
-    return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-}
 
 function buildFacultyUrl(name, department) {
     // AI-generated profile URLs are unreliable; link to department directory
@@ -650,6 +644,8 @@ function loadSavedData() {
     const rawNews = JSON.parse(localStorage.getItem('ffc_news') || '[]');
     const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 6);
     newsItems = rawNews.filter(item => {
+        // Drop AI-generated items (no real URL) and items older than 6 months
+        if (!item.url) return false;
         const d = new Date(item.date); return !isNaN(d) && d >= cutoff;
     });
     opportunities = JSON.parse(localStorage.getItem('ffc_opps') || '[]');
@@ -763,27 +759,34 @@ async function refreshNews() {
     if (!studentData.name) return;
     const spinnerEl = $('newsLoading');
     if (spinnerEl) spinnerEl.style.display = 'block';
-    const today = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    const interests = [...studentData.interests, ...(studentData.major ? [studentData.major] : [])].filter(Boolean).join(', ') || 'general career development';
-    const messages = [
-        { role: 'system', content: `Generate 7-8 recent industry news articles specifically relevant to this student's field and career direction.
-RULES:
-- Use ONLY reputable major outlets: NYT, Wall Street Journal, Forbes, Harvard Business Review, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, Washington Post, Vox, TIME, The Economist, etc.
-- Every article date MUST be within the last 6 months. Today is ${today}. Do not use dates before ${new Date(Date.now() - 180*24*60*60*1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
-- Headlines must be specific to the student's field — not generic career advice headlines
-- Each headline should read like a real recent article a professional in this field would actually care about
-- Do NOT include URLs
-Output raw JSON array only (no markdown fences): [{"title":"...","source":"...","date":"..."}]` },
-        { role: 'user', content: `Student interests and field: ${interests}\n\n${profileBlurb()}` }
-    ];
-    const raw = await callAI(messages, 700);
+
+    // Build a search query from student interests + major (top 3 terms, OR-joined)
+    const terms = [...(studentData.interests || []), studentData.major]
+        .filter(Boolean)
+        .flatMap(s => s.split(/[,;]+/).map(t => t.trim()))
+        .filter(t => t.length > 2)
+        .slice(0, 3);
+    const query = terms.length
+        ? terms.map(t => `"${t}"`).join(' OR ')
+        : 'career industry news';
+
+    try {
+        const resp = await fetch('/api/news', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query }),
+        });
+        const data = await resp.json();
+        if (data.articles?.length) {
+            newsItems = data.articles;
+            persist();
+        }
+    } catch (err) {
+        console.warn('News fetch failed:', err);
+    }
+
     const spinner = $('newsLoading');
     if (spinner) spinner.style.display = 'none';
-    const fresh = tryParseJSON(raw);
-    if (Array.isArray(fresh) && fresh.length) {
-        newsItems = fresh;
-        persist();
-    }
     renderNews();
 }
 
@@ -1027,9 +1030,8 @@ function renderNews() {
         return;
     }
     el.innerHTML = spinnerHTML + newsItems.map((n, i) => {
-        const searchUrl = buildNewsUrl(n.title, n.source);
-        const textBlock = searchUrl
-            ? `<a class="news-link" href="${esc(searchUrl)}" target="_blank" rel="noopener noreferrer">
+        const textBlock = n.url
+            ? `<a class="news-link" href="${esc(n.url)}" target="_blank" rel="noopener noreferrer">
                 <div class="news-title">${esc(n.title)}</div>
                 <div class="news-source"><span>${esc(n.source)}</span><span class="news-date">· ${esc(n.date)}</span></div>
                </a>`
