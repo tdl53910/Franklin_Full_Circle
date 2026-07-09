@@ -342,54 +342,89 @@ Output ONLY raw JSON (no markdown fences):
   ]
 }`;
 
-const SYSTEM_CHAT = `You are the Franklin Full Circle career assistant at UGA's Franklin College of Arts & Sciences.
+const SYSTEM_CHAT = `You are the Franklin Full Circle career advisor at UGA's Franklin College of Arts & Sciences. You function like a knowledgeable, frank career counselor — someone with deep expertise in career paths, law school, graduate programs, industry trends, and UGA's specific resources.
 
 ${UGA_CONTEXT}
 
-CURRENT CONVERSATION CONTEXT:
-Student Profile:
+STUDENT CONTEXT:
 {PROFILE}
 
-Current Career Matches: {CAREERS}
+Current Dossier:
+{DOSSIER}
 
-Current Contacts: {CONTACTS}
+Career Matches Currently Shown: {CAREERS}
+Faculty Contacts Currently Shown: {CONTACTS}
+Organizations Currently Shown: {CLUBS}
 
-Current Clubs: {CLUBS}
+─── ACTION TAGS ───────────────────────────────────────────────
+When you need to update the dashboard, embed these tags in your response (they are stripped before display):
 
-INSTRUCTIONS:
-You are having an ongoing conversation with this student. Be conversational, helpful, and specific.
+[EXCLUDE: career name] — removes a career match bubble
 
-Your capabilities:
-1. Answer career questions with specific, actionable advice
-2. Suggest additional faculty contacts, clubs, news, or action items
-3. Refine and rewrite the career dossier to be more accurate based on what the student tells you
-4. Remove/exclude careers when asked
+[ADD_CONTACTS: [{"name":"Dr. Full Name","email":"x@uga.edu","department":"Department","expertise":"specific research focus"}]]
 
-When you want to ADD or UPDATE items, include these tags in your response:
-- [EXCLUDE: career name] — removes a career from recommendations
-- [ADD_CONTACTS: [{"name":"Dr. X","email":"x@uga.edu","department":"Dept","expertise":"focus"}]]
-- [ADD_CLUBS: [{"name":"Org","description":"why"}]]
-- [ADD_NEWS: [{"title":"headline","source":"pub","date":"date"}]]
-- [ADD_OPPS: [{"title":"action","type":"category"}]]
-- [UPDATE_DOSSIER: {"overview":"...","tier1":"...","tier2":"...","tier3":"...","summary":"...","careerMatches":["role1","role2",...]}] — rewrites dossier sections in place. Include ONLY the fields you are changing. Write the same depth as the original (4-7 sentences per section).
+[ADD_CLUBS: [{"name":"Exact org name from verified list","description":"why this org serves their specific goals"}]]
 
-DOSSIER UPDATE RULES — follow these precisely:
-- Use [UPDATE_DOSSIER] IMMEDIATELY and WITHOUT BEING ASKED whenever the student:
-  • Corrects something in the dossier ("that's not right", "actually I...", "I'm more interested in...")
-  • Shares new information about themselves, their goals, or their background
-  • Says the dossier doesn't reflect them accurately
-  • Clarifies or refines their interests, skills, or career direction
-  • Asks you to update, rewrite, refine, or fix the dossier
-- When rewriting, prioritize EXACTLY what the student told you over any assumptions from the original profile
-- The rewritten dossier must feel like it was written about THIS specific person based on what they've said — not a generic template
-- If the student says something is inaccurate, fix it and explain what you changed
+[ADD_NEWS: [{"title":"headline","source":"outlet","date":"Month YYYY"}]]
 
-GENERAL RULES:
-- Be conversational and natural, not robotic
-- Give specific advice referencing real UGA resources
-- Keep responses focused (3-6 sentences unless more detail requested)
-- Actually help — don't just describe what you could do
-- Reference the conversation history to maintain continuity`;
+[ADD_OPPS: [{"title":"specific concrete action","type":"category"}]]
+
+[UPDATE_DOSSIER: {"overview":"...","tier1":"...","tier2":"...","tier3":"...","summary":"...","careerMatches":["role1","role2",...]}]
+  — Rewrites dossier sections silently. Include ONLY the fields you are changing.
+  — Each section must be 4-7 sentences, same depth as the original.
+  — careerMatches should be 10-15 role titles reflecting the updated direction.
+
+─── WHEN TO UPDATE THE DOSSIER ────────────────────────────────
+Trigger [UPDATE_DOSSIER] immediately — WITHOUT being asked — whenever the student:
+  • Mentions a new career interest, field, or goal ("I'm thinking about law school", "I want to go into policy")
+  • Corrects or contradicts anything in their dossier
+  • Shares new background, experiences, or skills you didn't know about
+  • Asks you to redirect, refocus, or update their plan
+  • Explicitly says the dossier is wrong or doesn't fit them
+
+The update should happen in the same response as your reply. Do not ask permission first.
+Write it as if this student came to you describing themselves freshly — not as a template update.
+
+─── LANGUAGE RULES ────────────────────────────────────────────
+NEVER use assumptive language. The student has not done anything you suggest yet.
+  ✗ WRONG: "You connected with Dr. Smith..." / "You joined the Pre-Law Society..."
+  ✓ RIGHT: "Consider reaching out to Dr. Smith..." / "The Pre-Law Society would be worth looking into..."
+
+NEVER recommend specific faculty by name unless they appear in the VERIFIED FACULTY list provided.
+NEVER recommend specific clubs by name unless they appear in the VERIFIED ORGS list provided or are already in the student's clubs list.
+
+─── FOLLOW-UP QUESTIONS ───────────────────────────────────────
+When the student shares a new direction, interest, or goal, close your response with 1-2 specific, relevant follow-up questions. These should help you give better advice — not filler questions.
+
+Good examples for a student interested in law school:
+  "Are you drawn to a particular area of law — litigation, transactional, policy, or something like legal technology or environmental law?"
+  "Are you thinking BigLaw, a smaller firm, government, or public interest work after law school?"
+  "What's your target timeline for applying — are you aiming for next cycle or a few years out?"
+
+Bad examples (do not use):
+  "What are your hobbies?" / "Tell me more about yourself." / "What do you hope to achieve?"
+
+─── QUALITY OF ADVICE ──────────────────────────────────────────
+Be a real advisor, not a brochure. Give concrete, specific, honest advice:
+  • Name real programs, deadlines, organizations, and tradeoffs
+  • If the student is asking about law school: discuss LSAT prep, timeline (3L or 1L recruiting), UGA Law vs. other schools, T14 vs. regional, etc.
+  • If the student is asking about a career path: give realistic entry points, salary ranges, what the work actually involves, and what makes a strong candidate
+  • Reference their specific background — their major, skills, and experiences — when making recommendations
+  • If their plan has a weakness or gap, say so honestly and suggest how to address it
+
+Keep responses 3-6 sentences unless the student asks for more detail. Be direct and conversational.`;
+
+// Helper to build current dossier summary for chat context
+function dossierBlurb() {
+    if (!generatedDossier) return 'No dossier generated yet.';
+    return [
+        generatedDossier.overview ? `Overview: ${generatedDossier.overview}` : '',
+        generatedDossier.tier1   ? `Tier 1 (Primary): ${generatedDossier.tier1}` : '',
+        generatedDossier.tier2   ? `Tier 2 (Emerging): ${generatedDossier.tier2}` : '',
+        generatedDossier.tier3   ? `Tier 3 (Exploratory): ${generatedDossier.tier3}` : '',
+        generatedDossier.summary ? `Strategic Summary: ${generatedDossier.summary}` : '',
+    ].filter(Boolean).join('\n\n');
+}
 
 // ── init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', initializeApp);
@@ -409,9 +444,13 @@ async function initializeApp() {
         if (!generatedDossier) {
             updateDashboard();
         } else {
+            // Always fetch fresh news on load — no stale cache
             refreshNews();
         }
     }
+
+    // Refresh news every 3 minutes while the page is open
+    setInterval(() => { if (studentData.name && generatedDossier) refreshNews(); }, 3 * 60 * 1000);
 
     if (!chatHistory.length) {
         chatHistory.push({ 
@@ -584,7 +623,7 @@ function persist() {
     localStorage.setItem('ffc_dossier', JSON.stringify(generatedDossier));
     localStorage.setItem('ffc_contacts', JSON.stringify(contacts));
     localStorage.setItem('ffc_clubs', JSON.stringify(clubs));
-    localStorage.setItem('ffc_news', JSON.stringify(newsItems));
+    // News is never persisted — always fetched fresh on load
     localStorage.setItem('ffc_opps', JSON.stringify(opportunities));
     localStorage.setItem('ffc_updated', new Date().toISOString());
 }
@@ -596,7 +635,7 @@ function loadSavedData() {
     generatedDossier = JSON.parse(localStorage.getItem('ffc_dossier') || 'null');
     contacts = JSON.parse(localStorage.getItem('ffc_contacts') || '[]');
     clubs = JSON.parse(localStorage.getItem('ffc_clubs') || '[]');
-    newsItems = JSON.parse(localStorage.getItem('ffc_news') || '[]');
+    newsItems = []; // Always fetch fresh — never restore stale news
     opportunities = JSON.parse(localStorage.getItem('ffc_opps') || '[]');
 }
 
@@ -705,18 +744,23 @@ async function updateDashboard() {
 }
 
 async function refreshNews() {
+    if (!studentData.name) return;
+    $('newsLoading').style.display = 'block';
     const today = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const interests = [...studentData.interests, ...(studentData.major ? [studentData.major] : [])].filter(Boolean).join(', ') || 'general career development';
     const messages = [
-        { role: 'system', content: `Generate 5-6 recent industry news articles relevant to this student's career interests.
+        { role: 'system', content: `Generate 5-6 recent industry news articles specifically relevant to this student's field and career direction.
 RULES:
-- Use ONLY reputable major outlets: NYT, Wall Street Journal, Forbes, Harvard Business Review, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, Washington Post, Vox, TIME, etc.
-- Every article date must be within the last 6 months (today is ${today})
-- Headlines should sound like real, specific recent news — not generic
+- Use ONLY reputable major outlets: NYT, Wall Street Journal, Forbes, Harvard Business Review, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, Washington Post, Vox, TIME, The Economist, etc.
+- Every article date MUST be within the last 6 months. Today is ${today}. Do not use dates before ${new Date(Date.now() - 180*24*60*60*1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
+- Headlines must be specific to the student's field — not generic career advice headlines
+- Each headline should read like a real recent article a professional in this field would actually care about
 - Do NOT include URLs
-Output raw JSON array only (no markdown): [{"title":"...","source":"...","date":"..."}]` },
-        { role: 'user', content: profileBlurb() }
+Output raw JSON array only (no markdown fences): [{"title":"...","source":"...","date":"..."}]` },
+        { role: 'user', content: `Student interests and field: ${interests}\n\n${profileBlurb()}` }
     ];
-    const raw = await callAI(messages, 600);
+    const raw = await callAI(messages, 700);
+    $('newsLoading').style.display = 'none';
     const fresh = tryParseJSON(raw);
     if (Array.isArray(fresh) && fresh.length) {
         newsItems = fresh;
@@ -838,17 +882,36 @@ async function fetchMoreContacts() {
 // ── clubs rendering ──────────────────────────────────────────
 function renderClubs() {
     const el = $('clubList');
-    el.innerHTML = clubs.map((c, i) => {
-        return `
+    const query = ($('orgSearch')?.value || '').toLowerCase().trim();
+
+    let displayList;
+    let isSearch = false;
+
+    if (query.length >= 2) {
+        isSearch = true;
+        const words = query.split(/\s+/).filter(w => w.length > 1);
+        displayList = orgData.filter(o => {
+            const haystack = `${o.name} ${o.category} ${o.description} ${(o.keywords || []).join(' ')}`.toLowerCase();
+            return words.every(w => haystack.includes(w));
+        }).slice(0, 20);
+    } else {
+        displayList = clubs;
+    }
+
+    el.innerHTML = displayList.map((c, i) => `
         <li class="club-item">
-            <button class="item-x" onclick="removeClub(${i})" aria-label="Remove">
+            ${!isSearch ? `<button class="item-x" onclick="removeClub(${i})" aria-label="Remove">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
-            </button>
+            </button>` : ''}
             <div class="club-name">${esc(c.name)}</div>
-            <div class="club-description">${esc(c.description)}</div>
-        </li>`;
-    }).join('');
-    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreClubs()">+ Add more organizations</button>`;
+            <div class="club-description">${esc(c.description || c.category || '')}</div>
+        </li>`).join('');
+
+    if (!isSearch) {
+        el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreClubs()">+ Add more organizations</button>`;
+    } else if (displayList.length === 0) {
+        el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No organizations found for "${esc(query)}"</li>`;
+    }
 }
 
 async function fetchMoreClubs() {
@@ -985,6 +1048,7 @@ async function sendChatMessage() {
         : '';
     let sysPrompt = (SYSTEM_CHAT + facultyBlock + orgBlock)
         .replace('{PROFILE}', profileBlurb())
+        .replace('{DOSSIER}', dossierBlurb())
         .replace('{CAREERS}', careers)
         .replace('{CONTACTS}', contactNames)
         .replace('{CLUBS}', clubNames);
