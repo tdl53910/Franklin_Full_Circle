@@ -822,22 +822,25 @@ select.question-input {
     opacity: 1;
 }
 
-/* Add-from-search animation: black gradient + white plus */
+/* Add-from-search animation: dark gradient + white plus.
+   Uses rgba so the gradient is always dark in both light and dark mode
+   (--ink-900 inverts to near-white in dark mode and would be invisible). */
 .item-add {
     position: absolute;
     top: 0; right: 0; bottom: 0; width: 0;
-    background: linear-gradient(to right, transparent, var(--ink-900));
+    background: linear-gradient(to right, transparent, rgba(10, 12, 18, 0.88));
     border: none;
     border-radius: 0 4px 4px 0;
     cursor: pointer;
     display: flex; align-items: center; justify-content: flex-end;
     padding: 0 12px 0 0;
-    color: white;
+    color: #ffffff;
     overflow: hidden;
     transition: width 0.22s ease, opacity 0.15s ease;
     opacity: 0;
     z-index: 3;
 }
+.contact-item--add { cursor: pointer; }
 .contact-item--add:hover .item-add { width: 54px; opacity: 1; }
 .contact-item--added { opacity: 0.55; cursor: default; }
 .contact-item--added .contact-name::after {
