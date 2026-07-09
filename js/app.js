@@ -330,15 +330,15 @@ Output ONLY raw JSON (no markdown fences):
   ],
   "opportunities": [
     {"title": "<specific actionable step>", "type": "<category>"}
-    ... provide 5-6 items
+    ... provide exactly 5 items
   ],
   "suggestedContacts": [
     {"name": "Dr. Full Name", "email": "email@uga.edu", "department": "Department Name", "expertise": "Specific research focus"}
-    ... provide 3-4 faculty chosen from the VERIFIED FACULTY LIST appended to the end of this prompt. Pick those whose research best matches this student. Do NOT invent names not in that list. Do NOT include a profileUrl field.
+    ... provide exactly 5 faculty chosen from the VERIFIED FACULTY LIST appended to the end of this prompt. Pick those whose research best matches this student. Do NOT invent names not in that list. Do NOT include a profileUrl field.
   ],
   "suggestedClubs": [
     {"name": "Exact org name from the VERIFIED UGA STUDENT ORGANIZATIONS list", "description": "Why this org helps their specific career goals"}
-    ... provide 3-4 orgs chosen ONLY from the VERIFIED UGA STUDENT ORGANIZATIONS list appended to this prompt. Do NOT invent org names. Do NOT include a slug field.
+    ... provide exactly 5 orgs chosen ONLY from the VERIFIED UGA STUDENT ORGANIZATIONS list appended to this prompt. Do NOT invent org names. Do NOT include a slug field.
   ]
 }`;
 
