@@ -938,7 +938,7 @@ function renderClubs() {
     const savedNames = new Set(clubs.map(c => c.name));
 
     if (query.length >= 2) {
-        // Search mode — show results from full org database, clickable to add
+        // Search mode — hover gradient + animation, same pattern as faculty
         const words = query.split(/\s+/).filter(w => w.length > 1);
         const results = orgData.filter(o => {
             const haystack = `${o.name} ${o.category} ${o.description} ${(o.keywords || []).join(' ')}`.toLowerCase();
@@ -946,34 +946,23 @@ function renderClubs() {
         }).slice(0, 20);
 
         if (results.length === 0) {
-            el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No organizations found for "${esc(query)}"</li>`;
+            el.innerHTML = `<li class="club-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No organizations found for "${esc(query)}"</li>`;
             return;
         }
 
         el.innerHTML = results.map(o => {
             const saved = savedNames.has(o.name);
             const encoded = encodeURIComponent(o.name);
-            return `
-            <li class="club-item club-item--searchresult${saved ? ' club-item--saved' : ''}"
-                ${!saved ? `onclick="addOrgToProfile(decodeURIComponent('${encoded}'))" role="button" tabindex="0"` : ''}
-                title="${saved ? 'Already in your profile' : 'Click to add to your profile'}">
-                <div class="club-add-indicator">
-                    ${saved
-                        ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-                        : `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v8M2 6h8" stroke-linecap="round"/></svg>`}
-                </div>
-                <div>
-                    <div class="club-name">${esc(o.name)}</div>
-                    <div class="club-description">${esc(o.category || '')}</div>
-                </div>
+            return `<li class="club-item ${saved ? 'club-item--added' : 'club-item--add'}">
+                ${!saved ? `<button class="item-add" onclick="addOrgToProfile(decodeURIComponent('${encoded}'))" aria-label="Add to profile">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 1v10M1 6h10" stroke-linecap="round"/></svg>
+                </button>` : ''}
+                <div class="club-name">${esc(o.name)}</div>
+                <div class="club-description">${esc(o.category || '')}</div>
             </li>`;
         }).join('');
     } else {
-        // Default mode — show saved clubs with X to remove
-        if (clubs.length === 0) {
-            el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">Search organizations above to add them to your profile.</li>`;
-            return;
-        }
+        // Default mode — saved clubs with red × to remove + Add suggestions button
         el.innerHTML = clubs.map((c, i) => `
             <li class="club-item">
                 <button class="item-x" onclick="removeClub(${i})" aria-label="Remove">
@@ -982,6 +971,7 @@ function renderClubs() {
                 <div class="club-name">${esc(c.name)}</div>
                 <div class="club-description">${esc(c.description || c.category || '')}</div>
             </li>`).join('');
+        el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreClubs()">+ Add suggestions</button>`;
     }
 }
 
@@ -1003,6 +993,29 @@ function removeClub(idx) {
     persist();
     renderClubs();
 }
+
+async function fetchMoreClubs() {
+    const existingNames = clubs.map(c => c.name).join(', ');
+    const filteredOrgs = relevantOrgs(30);
+    const orgSource = filteredOrgs.length
+        ? `SELECT ONLY from this verified org list — do not invent names not on it:\n${JSON.stringify(filteredOrgs.map(o => ({ name: o.name, description: o.description })))}`
+        : '';
+    const messages = [
+        { role: 'system', content: `Suggest 3 MORE student organizations relevant to this student. Do NOT repeat anyone already listed. Output raw JSON array only (no markdown):\n[{"name":"Exact org name","description":"why this org fits their goals"}]\n\n${orgSource}` },
+        { role: 'user', content: `${profileBlurb()}\n\nAlready suggested (do not repeat): ${existingNames || 'none yet'}` }
+    ];
+    const raw = await callAI(messages, 500);
+    const newClubs = tryParseJSON(raw);
+    if (Array.isArray(newClubs) && newClubs.length) {
+        clubs = [...newClubs, ...clubs];
+        persist();
+        renderClubs();
+        showToast(`Added ${newClubs.length} organizations`, 'success');
+    } else {
+        showToast('Could not find additional organizations', 'error');
+    }
+}
+window.fetchMoreClubs = fetchMoreClubs;
 
 // ── news rendering ───────────────────────────────────────────
 function renderNews() {
