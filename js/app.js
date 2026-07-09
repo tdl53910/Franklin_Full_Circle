@@ -883,58 +883,67 @@ async function fetchMoreContacts() {
 function renderClubs() {
     const el = $('clubList');
     const query = ($('orgSearch')?.value || '').toLowerCase().trim();
-
-    let displayList;
-    let isSearch = false;
+    const savedNames = new Set(clubs.map(c => c.name));
 
     if (query.length >= 2) {
-        isSearch = true;
+        // Search mode — show results from full org database, clickable to add
         const words = query.split(/\s+/).filter(w => w.length > 1);
-        displayList = orgData.filter(o => {
+        const results = orgData.filter(o => {
             const haystack = `${o.name} ${o.category} ${o.description} ${(o.keywords || []).join(' ')}`.toLowerCase();
             return words.every(w => haystack.includes(w));
         }).slice(0, 20);
+
+        if (results.length === 0) {
+            el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No organizations found for "${esc(query)}"</li>`;
+            return;
+        }
+
+        el.innerHTML = results.map(o => {
+            const saved = savedNames.has(o.name);
+            const encoded = encodeURIComponent(o.name);
+            return `
+            <li class="club-item club-item--searchresult${saved ? ' club-item--saved' : ''}"
+                ${!saved ? `onclick="addOrgToProfile(decodeURIComponent('${encoded}'))" role="button" tabindex="0"` : ''}
+                title="${saved ? 'Already in your profile' : 'Click to add to your profile'}">
+                <div class="club-add-indicator">
+                    ${saved
+                        ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+                        : `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v8M2 6h8" stroke-linecap="round"/></svg>`}
+                </div>
+                <div>
+                    <div class="club-name">${esc(o.name)}</div>
+                    <div class="club-description">${esc(o.category || '')}</div>
+                </div>
+            </li>`;
+        }).join('');
     } else {
-        displayList = clubs;
-    }
-
-    el.innerHTML = displayList.map((c, i) => `
-        <li class="club-item">
-            ${!isSearch ? `<button class="item-x" onclick="removeClub(${i})" aria-label="Remove">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
-            </button>` : ''}
-            <div class="club-name">${esc(c.name)}</div>
-            <div class="club-description">${esc(c.description || c.category || '')}</div>
-        </li>`).join('');
-
-    if (!isSearch) {
-        el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreClubs()">+ Add more organizations</button>`;
-    } else if (displayList.length === 0) {
-        el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No organizations found for "${esc(query)}"</li>`;
+        // Default mode — show saved clubs with X to remove
+        if (clubs.length === 0) {
+            el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">Search organizations above to add them to your profile.</li>`;
+            return;
+        }
+        el.innerHTML = clubs.map((c, i) => `
+            <li class="club-item">
+                <button class="item-x" onclick="removeClub(${i})" aria-label="Remove">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
+                </button>
+                <div class="club-name">${esc(c.name)}</div>
+                <div class="club-description">${esc(c.description || c.category || '')}</div>
+            </li>`).join('');
     }
 }
 
-async function fetchMoreClubs() {
-    showToast('Finding more organizations…', 'info');
-    const existingNames = clubs.map(c => c.name).join(', ');
-    const filteredOrgs = relevantOrgs(30);
-    const orgSource = filteredOrgs.length
-        ? `SELECT ONLY from this verified UGA org list — do not invent names not on it:\n${JSON.stringify(filteredOrgs.map(o => ({ name: o.name, description: o.description })))}`
-        : '';
-    const messages = [
-        { role: 'system', content: `Suggest 3 MORE UGA student organizations relevant to this student. Do NOT repeat any already listed. Output raw JSON array only (no markdown):\n[{"name":"Org Name","description":"why this org helps their goals"}]\n\n${orgSource}` },
-        { role: 'user', content: `${profileBlurb()}\n\nAlready suggested (do not repeat): ${existingNames || 'none yet'}` }
-    ];
-    const raw = await callAI(messages, 400);
-    const newClubs = tryParseJSON(raw);
-    if (Array.isArray(newClubs) && newClubs.length) {
-        clubs = [...newClubs, ...clubs];
-        persist();
-        renderClubs();
-        showToast(`Added ${newClubs.length} organizations`, 'success');
-    } else {
-        showToast('Could not find additional organizations', 'error');
+function addOrgToProfile(name) {
+    if (clubs.some(c => c.name === name)) {
+        showToast(`Already in your profile`, 'info');
+        return;
     }
+    const org = orgData.find(o => o.name === name);
+    if (!org) return;
+    clubs.unshift({ name: org.name, description: org.description || org.category || '' });
+    persist();
+    renderClubs(); // re-render so checkmark shows immediately
+    showToast(`Added "${name}"`, 'success');
 }
 
 function removeClub(idx) {
@@ -1498,9 +1507,9 @@ function showToast(message, type = 'info') {
 window.removeCareer = removeCareer;
 window.removeContact = removeContact;
 window.removeClub = removeClub;
+window.addOrgToProfile = addOrgToProfile;
 window.removeNews = removeNews;
 window.removeOpp = removeOpp;
 window.toggleOpp = toggleOpp;
 window.fetchMoreContacts = fetchMoreContacts;
-window.fetchMoreClubs = fetchMoreClubs;
 window.fetchMoreOpportunities = fetchMoreOpportunities;

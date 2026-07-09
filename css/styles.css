@@ -409,6 +409,40 @@ body {
 .contact-email:hover { text-decoration: underline; }
 .contact-dept { font-size: 0.63rem; color: var(--ink-500); margin-top: 0.06rem; letter-spacing: 0.08px; }
 .club-description { font-size: 0.69rem; color: var(--ink-500); margin-top: 0.1rem; line-height: 1.45; }
+
+/* Search-result orgs: clickable to add */
+.club-item--searchresult {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-left: 0.6rem;
+}
+.club-item--searchresult:hover { background: var(--ink-50); border-left-color: var(--uga-red); }
+.club-item--saved { opacity: 0.55; cursor: default; }
+.club-item--saved:hover { background: transparent; border-left-color: transparent; }
+.club-add-indicator {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--ink-200);
+    color: var(--ink-400);
+    transition: border-color 0.14s, color 0.14s, background 0.14s;
+}
+.club-item--searchresult:not(.club-item--saved):hover .club-add-indicator {
+    border-color: var(--uga-red);
+    color: var(--uga-red);
+    background: var(--uga-red-soft);
+}
+.club-item--saved .club-add-indicator {
+    border-color: var(--ink-200);
+    color: var(--ink-400);
+    background: var(--ink-50);
+}
 .club-link {
     display: inline-block;
     font-size: 0.63rem;
