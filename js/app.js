@@ -101,6 +101,7 @@ let clubs = [];
 let newsItems = [];
 let opportunities = [];
 let draggedItem = null;
+let searchDisplayList = [];
 let chatBusy = false;
 let facultyData = [];
 let orgData = [];
@@ -326,7 +327,7 @@ Output ONLY raw JSON (no markdown fences):
   "careerMatches": ["<role1>", "<role2>", ... 10-15 distinct role titles from all tiers],
   "news": [
     {"title": "<real recent article headline related to student's interests>", "source": "<reputable outlet: NYT, WSJ, Forbes, HBR, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, etc>", "date": "<within the last 6 months, e.g. 'June 2026' or 'March 2026'>"}
-    ... provide 5-6 items. Use ONLY reputable major outlets. All dates must be within the last 6 months. Do NOT include a url field.
+    ... provide 7-8 items. Use ONLY reputable major outlets. All dates must be within the last 6 months. Do NOT include a url field.
   ],
   "opportunities": [
     {"title": "<specific actionable step — no faculty name-drops; reference UGA offices and programs instead>", "type": "<category>"}
@@ -409,6 +410,14 @@ Bad: "What are your hobbies?" / "Tell me more about yourself."
 
 ─── QUALITY OF ADVICE ──────────────────────────────────────────
 Be a real advisor: name real programs, tradeoffs, and realistic timelines. If a plan has a gap, say so.
+
+─── CASUAL / GENERAL QUESTIONS ─────────────────────────────────
+When the student asks a simple practical question that is NOT about changing their career direction (e.g., "How do I get involved with consulting?", "What GPA do I need for law school?", "How do I write a cold email?"):
+- Give 1 sentence of direct practical advice. No lists.
+- End with exactly: "Want on-campus or UGA-specific recommendations for that?"
+- Do NOT emit [UPDATE_DOSSIER] — these questions don't signal a directional change.
+- Do NOT overwhelm with multiple options or named programs unless asked.
+Example: "Consulting entry points are case competitions, internships, and joining relevant clubs. Want on-campus or UGA-specific recommendations for that?"
 
 RESPONSE FORMAT — STRICT:
 - MAXIMUM 2 sentences in the main body. Hard limit — no exceptions.
@@ -638,7 +647,11 @@ function loadSavedData() {
     generatedDossier = JSON.parse(localStorage.getItem('ffc_dossier') || 'null');
     contacts = JSON.parse(localStorage.getItem('ffc_contacts') || '[]');
     clubs = JSON.parse(localStorage.getItem('ffc_clubs') || '[]');
-    newsItems = JSON.parse(localStorage.getItem('ffc_news') || '[]');
+    const rawNews = JSON.parse(localStorage.getItem('ffc_news') || '[]');
+    const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 6);
+    newsItems = rawNews.filter(item => {
+        const d = new Date(item.date); return !isNaN(d) && d >= cutoff;
+    });
     opportunities = JSON.parse(localStorage.getItem('ffc_opps') || '[]');
 }
 
@@ -722,7 +735,7 @@ async function updateDashboard() {
         { role: 'user', content: profileBlurb() }
     ];
 
-    const raw = await callAI(messages, 2500);
+    const raw = await callAI(messages, 3500);
     $('dossierLoading').style.display = 'none';
 
     const parsed = tryParseJSON(raw);
@@ -753,7 +766,7 @@ async function refreshNews() {
     const today = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     const interests = [...studentData.interests, ...(studentData.major ? [studentData.major] : [])].filter(Boolean).join(', ') || 'general career development';
     const messages = [
-        { role: 'system', content: `Generate 5-6 recent industry news articles specifically relevant to this student's field and career direction.
+        { role: 'system', content: `Generate 7-8 recent industry news articles specifically relevant to this student's field and career direction.
 RULES:
 - Use ONLY reputable major outlets: NYT, Wall Street Journal, Forbes, Harvard Business Review, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, Washington Post, Vox, TIME, The Economist, etc.
 - Every article date MUST be within the last 6 months. Today is ${today}. Do not use dates before ${new Date(Date.now() - 180*24*60*60*1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
@@ -778,14 +791,26 @@ Output raw JSON array only (no markdown fences): [{"title":"...","source":"...",
 function renderDossier() {
     if (!generatedDossier) return;
     const d = generatedDossier;
-    $('overviewText').textContent = d.overview || '';
-    $('tier1Text').textContent = d.tier1 || '';
-    $('tier2Text').textContent = d.tier2 || '';
-    $('tier3Text').textContent = d.tier3 || '';
-    $('summaryText').textContent = d.summary || '';
+
+    const sections = [
+        ['overviewSection', 'overviewText', d.overview],
+        ['tier1Section',    'tier1Text',    d.tier1],
+        ['tier2Section',    'tier2Text',    d.tier2],
+        ['tier3Section',    'tier3Text',    d.tier3],
+        ['summarySection',  'summaryText',  d.summary],
+    ];
+    sections.forEach(([sId, pId, text]) => {
+        const s = $(sId); const p = $(pId);
+        if (!s || !p) return;
+        if (text) { p.textContent = text; s.style.display = ''; }
+        else        { s.style.display = 'none'; }
+    });
 
     const excluded = excludedPaths.length ? ` · Excluded: ${excludedPaths.join(', ')}` : '';
     $('dossierMeta').textContent = `${studentData.name} · ${studentData.year} · ${studentData.major}${excluded}`;
+
+    const dc = $('dossierContent');
+    if (dc) dc.scrollTop = 0;
 }
 
 function renderCareerBubbles() {
@@ -837,16 +862,23 @@ function renderContacts() {
         displayList = contacts;
     }
 
-    el.innerHTML = displayList.map((c, i) => `
-        <li class="contact-item">
+    if (query) searchDisplayList = displayList;
+
+    el.innerHTML = displayList.map((c, i) => {
+        const isAdded = query && contacts.some(p => p.name === c.name);
+        const extraClass = query ? (isAdded ? 'contact-item--added' : 'contact-item--add') : '';
+        return `<li class="contact-item ${extraClass}">
             ${!query ? `<button class="item-x" onclick="removeContact(${i})" aria-label="Remove">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
+            </button>` : ''}
+            ${(query && !isAdded) ? `<button class="item-add" onclick="addSearchContact(${i})" aria-label="Add to profile">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 1v10M1 6h10" stroke-linecap="round"/></svg>
             </button>` : ''}
             <div class="contact-name">${esc(c.name)}</div>
             ${normalizeEmail(c.email) ? `<a href="mailto:${esc(normalizeEmail(c.email))}" class="contact-email">${esc(normalizeEmail(c.email))}</a>` : `<div class="contact-email">${esc(c.email || 'Email unavailable')}</div>`}
             <div class="contact-dept">${esc(c.department)}${c.expertise ? ' · ' + esc(c.expertise) : ''}</div>
-        </li>
-    `).join('');
+        </li>`;
+    }).join('');
 
     if (!query) {
         el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreContacts()">+ Add suggestions</button>`;
@@ -862,6 +894,20 @@ function removeContact(idx) {
     persist();
     renderContacts();
 }
+
+function addSearchContact(idx) {
+    const c = searchDisplayList[idx];
+    if (!c) return;
+    if (contacts.some(p => p.name === c.name)) {
+        showToast(`${c.name} already in your list`, 'info');
+        return;
+    }
+    contacts.unshift(c);
+    persist();
+    renderContacts();
+    showToast(`Added ${c.name}`, 'success');
+}
+window.addSearchContact = addSearchContact;
 
 async function fetchMoreContacts() {
     const existingNames = contacts.map(c => c.name).join(', ');
@@ -1266,8 +1312,23 @@ function setupDragAndDrop() {
         item.addEventListener('dragstart', function(e) {
             draggedItem = this;
             lastSwapAt  = Date.now();
-            requestAnimationFrame(() => this.classList.add('dragging'));
             e.dataTransfer.effectAllowed = 'move';
+
+            // Clone off-screen so the browser snapshot only captures this card
+            const clone = this.cloneNode(true);
+            const rect  = this.getBoundingClientRect();
+            Object.assign(clone.style, {
+                position: 'fixed', top: '-9999px', left: '-9999px',
+                width:  rect.width  + 'px',
+                height: rect.height + 'px',
+                overflow: 'hidden', pointerEvents: 'none', opacity: '1',
+            });
+            document.body.appendChild(clone);
+            e.dataTransfer.setDragImage(clone, e.clientX - rect.left, e.clientY - rect.top);
+            requestAnimationFrame(() => {
+                document.body.removeChild(clone);
+                this.classList.add('dragging');
+            });
         });
 
         item.addEventListener('dragend', function() {
