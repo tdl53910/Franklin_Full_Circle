@@ -1547,15 +1547,15 @@ function downloadPDF() {
         y += 17;
 
         doc.setFont('times', 'normal');
-        doc.setFontSize(10.5);
+        doc.setFontSize(10);
         doc.setTextColor(...MID);
         doc.splitTextToSize(text, TW).forEach(line => {
-            checkPage(15);
+            checkPage(13);
             doc.text(line, ML, y);
-            y += 14;
+            y += 13;
         });
 
-        y += 20;
+        y += 12;
     });
 
     doc.save((studentData.name || 'Student').replace(/\s+/g, '_') + '_Career_Dossier.pdf');
