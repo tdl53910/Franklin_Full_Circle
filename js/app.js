@@ -455,9 +455,9 @@ async function initializeApp() {
     setInterval(() => { if (studentData.name && generatedDossier) refreshNews(); }, 3 * 60 * 1000);
 
     if (!chatHistory.length) {
-        chatHistory.push({ 
-            role: 'assistant', 
-            content: 'Welcome to Franklin Full Circle! I\'m your AI career advisor with deep knowledge of UGA\'s programs, faculty, and resources. Complete your profile and I\'ll generate personalized career pathways. Then we can refine them together — tell me what resonates, what to remove, or what you\'d like to explore further.' 
+        chatHistory.push({
+            role: 'assistant',
+            content: 'Welcome to Franklin Full Circle. Complete your profile above and I\'ll generate personalized career pathways. Once your dossier is ready, use this chat to refine your direction, explore options, or ask anything about UGA resources, graduate programs, or career paths.'
         });
     }
     renderChatHistory();
@@ -1210,7 +1210,12 @@ function renderChatHistory() {
 }
 
 function clearChatView() {
-    $('chatMessages').innerHTML = '';
+    chatHistory = [{
+        role: 'assistant',
+        content: 'Hi! Ask me anything about your career paths, UGA resources, or how to refine your dossier.'
+    }];
+    persist();
+    renderChatHistory();
 }
 
 // ── stats ────────────────────────────────────────────────────
