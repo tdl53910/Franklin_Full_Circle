@@ -310,19 +310,19 @@ ${UGA_CONTEXT}
 TONE AND WRITING RULES:
 - Write analytically and objectively — this is an assessment, not a sales pitch or motivational letter.
 - Do NOT use flattering or hype language ("uniquely positioned," "superpower," "rare and valuable," etc.).
+- STRICT THIRD PERSON throughout every section — never use "you," "your," "you should," "consider," or any second-person address. Write as "This student," "Their background," "Students with this profile," "The candidate," etc.
 - State the student's demonstrated interests, skills, and academic focus plainly and accurately.
 - For each career path, describe what the role involves, why it aligns with the student's stated background, and one concrete next step.
-- Each section must be 4-6 sentences. Be specific and grounded — no filler.
+- Each tier paragraph must be 7-9 sentences. Be specific and grounded — no filler.
 - Reference real UGA resources, programs, and deadlines by name.
-- Write in third person (e.g., "This student's background in..." or "Students with this profile...").
 
 Output ONLY raw JSON (no markdown fences):
 {
-  "overview": "<4-6 sentences objectively describing the student's academic background, demonstrated interests, and skill set. State what their coursework and experiences suggest about their career inclinations — no embellishment.>",
-  "tier1": "<Full paragraph (5-7 sentences) identifying 3-4 PRIMARY career paths that align directly with the student's stated major, skills, and interests. For each: describe the role, explain the specific alignment with this student's profile, and name one concrete step or UGA resource.>",
-  "tier2": "<Full paragraph (5-7 sentences) identifying 3-4 ADJACENT or EMERGING paths the student's background qualifies them for, including fields they may not have considered. Explain the connection to their existing skills and what additional preparation would help.>",
-  "tier3": "<Full paragraph (4-5 sentences) identifying 2-3 LONGER-TERM or UNCONVENTIONAL paths — graduate study options, entrepreneurial directions, or niche fields — that are feasible but require additional development or commitment.>",
-  "summary": "<Full paragraph (5-7 sentences) listing CONCRETE near-term actions: specific steps for this week, this month, and this semester. Name real UGA offices (Career Center, CURO, Handshake, specific departments) and realistic timelines.>",
+  "overview": "<4-6 sentences objectively describing the student's academic background, demonstrated interests, and skill set. State what their coursework and experiences suggest about their career inclinations — no embellishment. Third person only.>",
+  "tier1": "<Full paragraph (7-9 sentences). THE VERY FIRST SENTENCE must explicitly name the 3-4 primary career paths (e.g., 'Primary pathways for this student include [Role A], [Role B], and [Role C].'). Then for each path: describe what the role involves, explain how this student's specific background aligns with it, and name one concrete next step or UGA resource. Third person throughout — never 'you' or 'your.'>",
+  "tier2": "<Full paragraph (7-9 sentences). THE VERY FIRST SENTENCE must explicitly name the 3-4 adjacent/emerging paths (e.g., 'Adjacent opportunities include [Role A], [Role B], and [Role C].'). For each: explain the connection to the student's existing skills and what additional preparation would strengthen their candidacy. Third person throughout.>",
+  "tier3": "<Full paragraph (5-7 sentences). THE VERY FIRST SENTENCE must name the 2-3 longer-term paths (e.g., 'Longer-term options worth tracking include [Path A] and [Path B].'). Explain feasibility given the student's trajectory and what additional development each path requires. Third person throughout.>",
+  "summary": "<Full paragraph (5-7 sentences) listing CONCRETE near-term actions: specific steps for this week, this month, and this semester. Name real UGA offices (Career Center, CURO, Handshake, specific departments) and realistic timelines. Third person throughout.>",
   "careerMatches": ["<role1>", "<role2>", ... 10-15 distinct role titles from all tiers],
   "news": [
     {"title": "<real recent article headline related to student's interests>", "source": "<reputable outlet: NYT, WSJ, Forbes, HBR, Bloomberg, TechCrunch, Wired, The Atlantic, Fast Company, MIT Technology Review, NPR, Reuters, AP, Science, Nature, etc>", "date": "<within the last 6 months, e.g. 'June 2026' or 'March 2026'>"}
@@ -371,7 +371,9 @@ When you need to update the dashboard, embed these tags in your response (they a
 
 [UPDATE_DOSSIER: {"overview":"...","tier1":"...","tier2":"...","tier3":"...","summary":"...","careerMatches":["role1","role2",...]}]
   — Rewrites dossier sections silently. Include ONLY the fields you are changing.
-  — Each section must be 4-7 sentences, same depth as the original.
+  — Each tier section must be 7-9 sentences (overview 4-6, summary 5-7).
+  — Each tier's FIRST SENTENCE must explicitly name the career paths covered in that tier.
+  — STRICT THIRD PERSON throughout — never "you" or "your." Use "this student," "their background," etc.
   — careerMatches should be 10-15 role titles reflecting the updated direction.
 
 ─── WHEN TO UPDATE THE DOSSIER ────────────────────────────────
@@ -1207,6 +1209,10 @@ function renderChatHistory() {
     container.scrollTop = container.scrollHeight;
 }
 
+function clearChatView() {
+    $('chatMessages').innerHTML = '';
+}
+
 // ── stats ────────────────────────────────────────────────────
 function updateStats() {
     $('profileName').textContent = studentData.name || 'Not Set';
@@ -1458,11 +1464,11 @@ function downloadPDF() {
 // ── fallbacks ────────────────────────────────────────────────
 function buildFallbackDossier() {
     return {
-        overview: `You operate at a distinctive intersection that few others occupy. Your combination of technical capability and humanistic perspective positions you for roles that require bridging divides — between data and decision-making, between innovation and impact, between systems and the people they serve. This kind of integrative thinking is increasingly rare and valuable in a world of narrow specialists.`,
-        tier1: `Three primary pathways stand out for your profile. First, consider Product Strategy roles at mission-driven technology companies, where your ability to synthesize technical and human considerations directly drives value. Second, explore Policy Research positions at think tanks like Brookings, RAND, or the Aspen Institute, where interdisciplinary fluency is the core asset. Third, look into Management Consulting (particularly at firms with strong public sector practices like McKinsey's public sector group or Deloitte Government), where your cross-domain thinking translates into client value. For immediate action: attend a UGA Career Center employer session with any of these sectors this semester.`,
-        tier2: `Beyond the obvious paths, several emerging opportunities deserve attention. Civic Technology roles (Code for America, US Digital Service, state-level digital services) are growing rapidly and explicitly value your profile type. University Innovation positions — program managers at places like UGA's Innovation District or academic entrepreneurship centers — reward people who can work across disciplines. Research operations roles at interdisciplinary institutes (think MIT Media Lab, Stanford's d.school, or Georgia Tech's IPAT) actively seek boundary-spanners. These paths may require building a specific portfolio piece: consider creating a case study or prototype that demonstrates your cross-domain capabilities.`,
-        tier3: `For longer-term possibilities worth tracking: founding an initiative at the intersection of your interests (the UGA Entrepreneurship Program and Innovation Fellows certificate could support this), pursuing joint graduate degrees that formalize your interdisciplinary expertise (JD/MBA, MPP/MS programs), or joining early-stage ventures where versatility is the job description. These paths require more runway but match your trajectory.`,
-        summary: `Your immediate roadmap: This week, email one UGA faculty member whose work intersects your interests — check the Computer Science or SPIA faculty directories for relevant researchers. Within 14 days, attend a student organization meeting in a space adjacent to your current focus. Use Handshake (uga.joinhandshake.com) to set up job alerts for your Tier 1 roles. Within 30 days, schedule an appointment at the UGA Career Center for a resume review oriented toward your target sectors. By end of semester, create one portfolio artifact — a brief, analysis, or prototype — that demonstrates your interdisciplinary lens. Bring this dossier to your academic advisor to align remaining coursework with these pathways.`,
+        overview: `This student's profile reflects a combination of technical capability and humanistic perspective that positions them well for roles bridging data and decision-making, innovation and impact. Their coursework and stated experiences suggest a leaning toward analytical and cross-disciplinary work rather than narrow specialization. The breadth of their background is the defining characteristic — one that translates into a specific set of career pathways where generalist depth is an asset.`,
+        tier1: `Primary pathways for this student include Product Strategy, Policy Research, and Management Consulting. Product Strategy roles at mission-driven technology companies draw directly on the ability to synthesize technical and human considerations; the UGA Career Center hosts employer panels with tech firms each semester where this pipeline is accessible. Policy Research positions at institutions like Brookings, RAND, or the Aspen Institute reward precisely the kind of interdisciplinary fluency this student's profile suggests; a relevant research methods course or CURO project would strengthen candidacy. Management Consulting — particularly at firms with established public sector practices such as McKinsey Public Sector or Deloitte Government — values cross-domain thinking as a core input; case interview preparation through the UGA Terry College Business Career Center is a concrete first step even for non-business majors. Each of these paths is accessible from a Franklin College background with deliberate positioning.`,
+        tier2: `Adjacent opportunities include Civic Technology, University Innovation roles, and Research Operations. Civic Technology organizations — Code for America, the U.S. Digital Service, and state-level digital services teams — are expanding and explicitly recruit candidates with interdisciplinary backgrounds; attending a civic tech hackathon or virtual info session is a low-barrier entry point. University Innovation positions, such as program managers at UGA's Innovation District or academic entrepreneurship centers, reward the ability to work across disciplines and departments — these roles often arise through internal postings and referrals rather than traditional job boards. Research Operations at interdisciplinary institutes (MIT Media Lab, Stanford's d.school, Georgia Tech's IPAT) actively seek generalists who can support cross-functional projects; a strong writing sample and demonstrated project management experience are the primary credentials needed. Building one concrete portfolio piece — a brief, case study, or initiative proposal — would materially strengthen candidacy across all of these paths.`,
+        tier3: `Longer-term options worth tracking include joint graduate degrees, entrepreneurial ventures, and independent research initiatives. Joint degree programs such as JD/MBA, MPP/MS, or MPA/MS combinations formally credential the kind of interdisciplinary expertise this student is developing and open doors that single-discipline credentials may not. Early-stage ventures — particularly those at the intersection of technology and public interest — are another avenue, as small teams at this stage value versatility over narrow specialization. The UGA Entrepreneurship Program and Innovation Fellows certificate provide structured support for students considering this direction. These paths require more runway than traditional employment but are well-matched to this student's profile trajectory.`,
+        summary: `Near-term priorities for this student begin with outreach: emailing one relevant UGA faculty member for an informational conversation this week — the Computer Science or SPIA faculty directories are useful starting points. Setting up targeted job alerts on Handshake (uga.joinhandshake.com) for Tier 1 role categories should follow within the same week. Within 14 days, attending a student organization meeting in an adjacent field will build both network and context. A scheduled appointment at the UGA Career Center for a resume review oriented toward target sectors is a productive 30-day goal. By end of semester, producing one portfolio artifact — an analysis, brief, or prototype — will give this student something tangible to reference in applications and conversations. Aligning remaining coursework with these pathways through an academic advisor meeting rounds out the near-term roadmap.`,
         careerMatches: ['Product Strategist', 'Policy Analyst', 'Management Consultant', 'Civic Technologist', 'Research Analyst', 'Innovation Program Manager', 'UX Researcher', 'Strategy Associate', 'Venture Analyst', 'Program Coordinator', 'Data Analyst', 'Business Analyst'],
         news: [
             { title: 'The rise of interdisciplinary careers in tech policy', source: 'Harvard Business Review', date: 'This week' },
@@ -1522,3 +1528,5 @@ window.removeOpp = removeOpp;
 window.toggleOpp = toggleOpp;
 window.fetchMoreContacts = fetchMoreContacts;
 window.fetchMoreOpportunities = fetchMoreOpportunities;
+window.clearChatView = clearChatView;
+window.refreshNews = refreshNews;

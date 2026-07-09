@@ -244,16 +244,23 @@ body {
     color: var(--uga-red);
 }
 
-.ai-badge {
-    font-size: 0.54rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--ink-500);
+.clear-chat-btn {
+    font-size: 0.65rem;
+    font-weight: 500;
+    font-family: var(--sans);
+    color: var(--ink-400);
     border: 1px solid var(--ink-200);
-    border-radius: 3px;
-    padding: 0.1rem 0.3rem;
-    background: var(--panel);
+    border-radius: 4px;
+    padding: 0.18rem 0.5rem;
+    background: transparent;
+    cursor: pointer;
+    transition: var(--ease);
+    letter-spacing: 0.1px;
+}
+.clear-chat-btn:hover {
+    border-color: var(--uga-red);
+    color: var(--uga-red);
+    background: var(--uga-red-soft);
 }
 
 /* ===== DOSSIER — centrepiece elevation ===== */
