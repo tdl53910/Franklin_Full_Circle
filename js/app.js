@@ -1015,15 +1015,19 @@ function renderNews() {
     }
     el.innerHTML = spinnerHTML + newsItems.map((n, i) => {
         const searchUrl = buildNewsUrl(n.title, n.source);
-        const inner = `
+        const textBlock = searchUrl
+            ? `<a class="news-link" href="${esc(searchUrl)}" target="_blank" rel="noopener noreferrer">
+                <div class="news-title">${esc(n.title)}</div>
+                <div class="news-source"><span>${esc(n.source)}</span><span class="news-date">· ${esc(n.date)}</span></div>
+               </a>`
+            : `<div class="news-title">${esc(n.title)}</div>
+               <div class="news-source"><span>${esc(n.source)}</span><span class="news-date">· ${esc(n.date)}</span></div>`;
+        return `<div class="news-item">
             <button class="item-x" onclick="removeNews(${i})" aria-label="Remove">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2l6 6M8 2L2 8" stroke-linecap="round"/></svg>
             </button>
-            <div class="news-title">${esc(n.title)}</div>
-            <div class="news-source"><span>${esc(n.source)}</span><span class="news-date">· ${esc(n.date)}</span></div>`;
-        return searchUrl
-            ? `<a class="news-item news-link" href="${esc(searchUrl)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-            : `<div class="news-item">${inner}</div>`;
+            ${textBlock}
+        </div>`;
     }).join('');
 }
 

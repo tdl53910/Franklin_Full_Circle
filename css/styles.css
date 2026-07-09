@@ -946,9 +946,9 @@ select.question-input {
     display: block;
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
 }
-.news-link:hover .news-title { color: var(--uga-red); }
-.news-link:hover { background: var(--ink-50); }
+.news-item:hover .news-title { color: var(--uga-red); }
 
 /* ===== FOCUS STATES ===== */
 button:focus-visible,
