@@ -1235,86 +1235,99 @@ function updateStats() {
 // ── drag & drop ──────────────────────────────────────────────
 function setupDragAndDrop() {
     const grid = $('dashboardGrid');
-    let lastTarget = null;
+    let lastSwapAt = 0;
+    const SWAP_COOLDOWN = 180; // ms — prevents rapid oscillation at card borders
 
-    // Snap any in-flight FLIP animations to completion before measuring.
-    // getBoundingClientRect() returns the visual (transformed) position during
-    // a CSS transition, so mid-animation measurements corrupt the next FLIP.
-    function cancelInFlight() {
-        [...grid.children].forEach(el => {
-            el.style.transition = 'none';
-            el.style.transform  = '';
-        });
-        grid.offsetHeight; // force reflow to settle before next measurement
+    // ── auto-scroll ──────────────────────────────────────────
+    let scrollVel = 0;
+    let scrollRaf = null;
+    const SCROLL_ZONE = 120; // px from viewport edge
+    const SCROLL_MAX  = 14;  // px per frame at full speed
+
+    function scrollTick() {
+        if (Math.abs(scrollVel) > 0.1) {
+            window.scrollBy(0, scrollVel);
+            scrollRaf = requestAnimationFrame(scrollTick);
+        } else {
+            scrollRaf = null;
+        }
     }
 
+    function setScrollVel(clientY) {
+        const vh = window.innerHeight;
+        if (clientY < SCROLL_ZONE) {
+            scrollVel = -SCROLL_MAX * (1 - clientY / SCROLL_ZONE);
+        } else if (clientY > vh - SCROLL_ZONE) {
+            scrollVel = SCROLL_MAX * (1 - (vh - clientY) / SCROLL_ZONE);
+        } else {
+            scrollVel = 0;
+        }
+        if (scrollVel && !scrollRaf) scrollRaf = requestAnimationFrame(scrollTick);
+    }
+
+    // ── card listeners ───────────────────────────────────────
     document.querySelectorAll('.grid-item').forEach(item => {
         item.addEventListener('dragstart', function(e) {
             draggedItem = this;
-            lastTarget  = null;
-            // Defer so the browser captures the drag ghost before opacity drops
+            lastSwapAt  = Date.now();
             requestAnimationFrame(() => this.classList.add('dragging'));
             e.dataTransfer.effectAllowed = 'move';
         });
 
         item.addEventListener('dragend', function() {
-            cancelInFlight();
+            scrollVel = 0;
             this.classList.remove('dragging');
             draggedItem = null;
-            lastTarget  = null;
             saveGridPositions();
         });
     });
 
-    // Listen on the grid container — avoids duplicate fires from child elements
-    // inside each card triggering their parent's dragenter handler.
-    grid.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-
-    grid.addEventListener('dragenter', function(e) {
+    // ── dragover: single handler does everything ─────────────
+    // Using dragover (not dragenter) avoids duplicate fires from child elements.
+    // Throttle + midpoint-crossing guard prevents rapid oscillation.
+    grid.addEventListener('dragover', function(e) {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setScrollVel(e.clientY);
+
         if (!draggedItem) return;
 
         const target = e.target.closest('.grid-item');
+        if (!target || target === draggedItem) return;
 
-        // Pointer moved into the grid background — reset so re-entering the
-        // same card later still triggers a reorder.
-        if (!target) { lastTarget = null; return; }
-        if (target === draggedItem || target === lastTarget) return;
-        lastTarget = target;
+        // Throttle: don't swap more than once per SWAP_COOLDOWN ms
+        const now = Date.now();
+        if (now - lastSwapAt < SWAP_COOLDOWN) return;
 
-        const cards = [...grid.children];
+        // Midpoint guard: only commit the swap once the cursor has crossed
+        // the center of the target card.  Prevents cards from bouncing back
+        // and forth when the cursor lingers near a card border.
+        const rect   = target.getBoundingClientRect();
+        const midX   = rect.left + rect.width  / 2;
+        const midY   = rect.top  + rect.height / 2;
+        const cards  = [...grid.children];
+        const dIdx   = cards.indexOf(draggedItem);
+        const tIdx   = cards.indexOf(target);
 
-        // Settle any in-flight animations so measurements are accurate
-        cancelInFlight();
+        // Decide axis: same row → horizontal check; different row → vertical
+        const dragRect  = draggedItem.getBoundingClientRect();
+        const sameRow   = Math.abs(rect.top - dragRect.top) < rect.height * 0.5;
+        if (sameRow) {
+            if (dIdx < tIdx && e.clientX < midX) return; // moving right, not past mid
+            if (dIdx > tIdx && e.clientX > midX) return; // moving left, not past mid
+        } else {
+            if (dIdx < tIdx && e.clientY < midY) return; // moving down, not past mid
+            if (dIdx > tIdx && e.clientY > midY) return; // moving up, not past mid
+        }
 
-        const before = new Map(cards.map(el => [el, el.getBoundingClientRect()]));
+        lastSwapAt = now;
+        if (dIdx < tIdx) grid.insertBefore(draggedItem, target.nextSibling);
+        else             grid.insertBefore(draggedItem, target);
+    });
 
-        // Live DOM reorder
-        const dragIdx   = cards.indexOf(draggedItem);
-        const targetIdx = cards.indexOf(target);
-        if (dragIdx < targetIdx) grid.insertBefore(draggedItem, target.nextSibling);
-        else                     grid.insertBefore(draggedItem, target);
-
-        // FLIP — animate each displaced card from its old rect to its new one
-        [...grid.children].forEach(el => {
-            if (el === draggedItem) return;
-            const old = before.get(el);
-            if (!old) return;
-            const now = el.getBoundingClientRect();
-            const dx  = old.left - now.left;
-            const dy  = old.top  - now.top;
-            if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-
-            el.style.transition = 'none';
-            el.style.transform  = `translate(${dx}px,${dy}px)`;
-            el.offsetHeight; // force reflow so start position is registered
-            el.style.transition = 'transform 0.18s ease';
-            el.style.transform  = '';
-            el.addEventListener('transitionend', () => {
-                el.style.transition = '';
-                el.style.transform  = '';
-            }, { once: true });
-        });
+    grid.addEventListener('dragleave', function(e) {
+        // Stop scrolling when the cursor leaves the grid entirely
+        if (!grid.contains(e.relatedTarget)) scrollVel = 0;
     });
 
     grid.addEventListener('drop', e => e.preventDefault());
