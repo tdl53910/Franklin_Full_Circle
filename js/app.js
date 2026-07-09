@@ -710,6 +710,7 @@ function renderAll() {
     renderOpportunities();
     renderCareerBubbles();
     updateStats();
+    updateQuickChips();
 }
 
 // ── dashboard orchestration ──────────────────────────────────
@@ -791,6 +792,19 @@ async function refreshNews() {
 }
 
 // ── dossier rendering ────────────────────────────────────────
+function updateQuickChips() {
+    const careers = generatedDossier?.careerMatches || [];
+    const chips = document.querySelectorAll('.quick-chip');
+    if (careers.length >= 1 && chips[0]) {
+        chips[0].textContent = `Focus on ${careers[0]}`;
+        chips[0].dataset.prompt = `Shift my dossier and recommendations to focus more on ${careers[0]} roles.`;
+    }
+    if (careers.length >= 2 && chips[1]) {
+        chips[1].textContent = `Skills for ${careers[1]}`;
+        chips[1].dataset.prompt = `What specific skills, experiences, and steps do I need to break into ${careers[1]}?`;
+    }
+}
+
 function renderDossier() {
     if (!generatedDossier) return;
     const d = generatedDossier;
@@ -1241,6 +1255,7 @@ async function sendChatMessage() {
             }
             renderDossier();
             renderCareerBubbles();
+            updateQuickChips();
             showToast('Dossier updated!', 'success');
         }
     }
