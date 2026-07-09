@@ -491,6 +491,7 @@ body {
 .news-title { font-weight: 500; font-size: 0.79rem; color: var(--ink-800); margin-bottom: 0.12rem; line-height: 1.45; }
 .news-source { font-size: 0.63rem; color: var(--ink-500); display: flex; align-items: center; gap: 0.3rem; }
 .news-date { color: var(--uga-red); font-weight: 600; }
+.news-empty { padding: 1rem 0.5rem; font-size: 0.78rem; color: var(--ink-400); font-style: italic; }
 
 /* ===== OPPORTUNITY CHECKLIST ===== */
 .opp-item {
@@ -506,7 +507,6 @@ body {
 }
 .opp-item:last-of-type { border-bottom: none; }
 .opp-item:hover { background: var(--ink-50); border-left-color: var(--uga-red); }
-.opp-item:hover .item-x { opacity: 1; }
 .opp-check-label { display: flex; align-items: center; padding-top: 0.13rem; cursor: pointer; flex-shrink: 0; }
 .opp-checkbox {
     width: 15px; height: 15px;
@@ -780,33 +780,33 @@ select.question-input {
 .toast.info { background: var(--ink-800); border-left-color: var(--ink-600); }
 
 /* ===== ITEM REMOVE BUTTONS ===== */
+.contact-item, .club-item, .news-item, .opp-item { overflow: hidden; }
 .item-x {
     position: absolute;
-    top: 0.4rem;
-    right: 0.35rem;
-    background: var(--panel);
-    border: 1px solid var(--ink-200);
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(to right, transparent, var(--uga-red));
+    border: none;
+    border-radius: 0 4px 4px 0;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--ink-400);
+    justify-content: flex-end;
+    padding: 0 11px 0 0;
+    color: white;
+    overflow: hidden;
+    transition: width 0.22s ease, opacity 0.15s ease;
     opacity: 0;
-    transition: var(--ease);
-    z-index: 2;
-    padding: 0;
+    z-index: 3;
 }
-.contact-item, .club-item, .news-item { position: relative; }
 .contact-item:hover .item-x,
 .club-item:hover .item-x,
-.news-item:hover .item-x { opacity: 1; }
-.item-x:hover {
-    background: var(--uga-red-light);
-    border-color: var(--uga-red);
-    color: var(--uga-red);
+.news-item:hover .item-x,
+.opp-item:hover .item-x {
+    width: 54px;
+    opacity: 1;
 }
 
 /* ===== SCROLLABLE CONTAINERS ===== */

@@ -623,7 +623,7 @@ function persist() {
     localStorage.setItem('ffc_dossier', JSON.stringify(generatedDossier));
     localStorage.setItem('ffc_contacts', JSON.stringify(contacts));
     localStorage.setItem('ffc_clubs', JSON.stringify(clubs));
-    // News is never persisted — always fetched fresh on load
+    localStorage.setItem('ffc_news', JSON.stringify(newsItems.slice(0, 10)));
     localStorage.setItem('ffc_opps', JSON.stringify(opportunities));
     localStorage.setItem('ffc_updated', new Date().toISOString());
 }
@@ -635,7 +635,7 @@ function loadSavedData() {
     generatedDossier = JSON.parse(localStorage.getItem('ffc_dossier') || 'null');
     contacts = JSON.parse(localStorage.getItem('ffc_contacts') || '[]');
     clubs = JSON.parse(localStorage.getItem('ffc_clubs') || '[]');
-    newsItems = []; // Always fetch fresh — never restore stale news
+    newsItems = JSON.parse(localStorage.getItem('ffc_news') || '[]');
     opportunities = JSON.parse(localStorage.getItem('ffc_opps') || '[]');
 }
 
@@ -745,7 +745,8 @@ async function updateDashboard() {
 
 async function refreshNews() {
     if (!studentData.name) return;
-    $('newsLoading').style.display = 'block';
+    const spinnerEl = $('newsLoading');
+    if (spinnerEl) spinnerEl.style.display = 'block';
     const today = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     const interests = [...studentData.interests, ...(studentData.major ? [studentData.major] : [])].filter(Boolean).join(', ') || 'general career development';
     const messages = [
@@ -760,12 +761,14 @@ Output raw JSON array only (no markdown fences): [{"title":"...","source":"...",
         { role: 'user', content: `Student interests and field: ${interests}\n\n${profileBlurb()}` }
     ];
     const raw = await callAI(messages, 700);
-    $('newsLoading').style.display = 'none';
+    const spinner = $('newsLoading');
+    if (spinner) spinner.style.display = 'none';
     const fresh = tryParseJSON(raw);
     if (Array.isArray(fresh) && fresh.length) {
         newsItems = fresh;
-        renderNews();
+        persist();
     }
+    renderNews();
 }
 
 // ── dossier rendering ────────────────────────────────────────
@@ -843,7 +846,7 @@ function renderContacts() {
     `).join('');
 
     if (!query) {
-        el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreContacts()">+ Add more faculty</button>`;
+        el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreContacts()">+ Add suggestions</button>`;
     } else if (displayList.length === 0) {
         el.innerHTML = `<li class="contact-item" style="color:var(--g-400);font-size:0.8rem;padding:0.5rem">No faculty found for "${esc(query)}"</li>`;
     }
@@ -955,7 +958,13 @@ function removeClub(idx) {
 // ── news rendering ───────────────────────────────────────────
 function renderNews() {
     const el = $('newsFeed');
-    el.innerHTML = newsItems.map((n, i) => {
+    // Always re-inject the spinner so it's never destroyed by innerHTML replacement
+    const spinnerHTML = '<div class="loading-spinner" id="newsLoading" style="display:none;"></div>';
+    if (!newsItems.length) {
+        el.innerHTML = spinnerHTML + `<div class="news-empty">No recent news loaded — generating now…</div>`;
+        return;
+    }
+    el.innerHTML = spinnerHTML + newsItems.map((n, i) => {
         const searchUrl = buildNewsUrl(n.title, n.source);
         const inner = `
             <button class="item-x" onclick="removeNews(${i})" aria-label="Remove">
@@ -992,7 +1001,7 @@ function renderOpportunities() {
             </button>
         </div>
     `).join('');
-    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreOpportunities()">+ Add more steps</button>`;
+    el.innerHTML += `<button class="add-more-btn" onclick="fetchMoreOpportunities()">+ Add more suggestions</button>`;
     $('opportunities').textContent = opportunities.filter(o => !o.done).length;
 }
 
