@@ -414,7 +414,12 @@ Be a real advisor, not a brochure. Give concrete, specific, honest advice:
   • Reference their specific background — their major, skills, and experiences — when making recommendations
   • If their plan has a weakness or gap, say so honestly and suggest how to address it
 
-Keep responses 3-6 sentences unless the student asks for more detail. Be direct and conversational.`;
+RESPONSE FORMAT:
+- Maximum 3-4 sentences in the main body. Never write bullet points, numbered lists, or multi-part breakdowns unless the student explicitly asks for a list.
+- Do not narrate what you are about to do — just do it. No "Here are three steps…" preamble.
+- Bold (**like this**) is reserved exclusively for follow-up questions at the very end of a response, never in the main body.
+- If asking a follow-up question, put it on its own line after a line break, in bold: **Question here?**
+- Be direct, specific, and brief. One sharp insight is worth more than three padded sentences.`;
 
 // Helper to build current dossier summary for chat context
 function dossierBlurb() {
@@ -1203,7 +1208,9 @@ function renderChatHistory() {
     chatHistory.slice(-50).forEach(m => {
         const node = document.createElement('div');
         node.className = `message ${m.role}`;
-        node.textContent = m.content;
+        node.innerHTML = esc(m.content)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
         container.appendChild(node);
     });
     container.scrollTop = container.scrollHeight;
